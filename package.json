@@ -1,0 +1,103 @@
+{
+	"name": "@natlibfi/melinda-rest-api-client-js",
+	"description": "Melinda's rest api client",
+	"author": {
+		"name": "The National Library of Finland"
+	},
+	"keywords": [],
+	"homepage": "https://github.com/natlibfi/melinda-rest-api-client-js",
+	"bugs": {
+		"url": "https://github.com/natlibfi/melinda-rest-api-client-js/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
+	},
+	"license": "LGPL-3.0+",
+	"version": "1.0.2",
+	"main": "./dist/index.js",
+	"engines": {
+		"node": ">=12"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"prepare": "npm run build",
+		"lint": "eslint src",
+		"lint:dev": "eslint --fix src",
+		"test:base": "cross-env NODE_ENV=test nyc mocha --require @babel/register",
+		"test": "npm run lint && npm run test:base -- src/*.spec.js src/**/**/*.spec.js",
+		"test:dev": "npm run lint:dev && npm run test:base -- src/*.spec.js src/**/**/*.spec.js && npm run coverage",
+		"coverage": "nyc check-coverage --per-file",
+		"build": "babel src --source-maps --copy-files --delete-dir-on-start --out-dir=dist",
+		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
+	},
+	"dependencies": {
+		"@natlibfi/marc-record": "6.0.2",
+		"@natlibfi/melinda-commons": "^9.0.0-alpha.2",
+		"@natlibfi/melinda-backend-commons": "^1.0.2",
+		"http-status": "^1.4.2",
+		"node-fetch": "^2.6.0"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.10.1",
+		"@babel/core": "^7.10.1",
+		"@babel/node": "^7.10.1",
+		"@babel/preset-env": "^7.10.1",
+		"@babel/register": "^7.10.1",
+		"@natlibfi/eslint-config-melinda-backend": "^1.0.3",
+		"@natlibfi/fixugen-http-client": "^1.0.0",
+		"@natlibfi/fixura": "^2.1.2",
+		"@natlibfi/marc-record": "^6.0.0",
+		"babel-eslint": "^10.1.0",
+		"babel-plugin-istanbul": "^6.0.0",
+		"babel-plugin-rewire": "^1.2.0",
+		"chai": "^4.2.0",
+		"cross-env": "^7.0.2",
+		"eslint": "^7.0.0",
+		"mocha": "^8.1.1",
+		"nock": "^13.0.3",
+		"nodemon": "^2.0.4",
+		"nyc": "^15.0.1"
+	},
+	"eslintConfig": {
+		"extends": "@natlibfi/melinda-backend"
+	},
+	"babel": {
+		"presets": [
+			[
+				"@babel/preset-env",
+				{
+					"targets": "maintained node versions"
+				}
+			]
+		],
+		"env": {
+			"test": {
+				"plugins": [
+					"istanbul",
+					"rewire"
+				]
+			}
+		}
+	},
+	"nyc": {
+		"exclude": [
+			"*/*.spec.js"
+		],
+		"reporter": [
+			"lcov",
+			"html"
+		],
+		"require": [
+			"@babel/register"
+		],
+		"sourceMap": false,
+		"instrument": false,
+		"lines": 80,
+		"statements": 80,
+		"functions": 80,
+		"branches": 80
+	}
+}
