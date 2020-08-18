@@ -104,7 +104,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
         throw error;
       }
 
-      logError(error);
+      logger.log('error', error);
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Unexpected internal error');
     }
   }
