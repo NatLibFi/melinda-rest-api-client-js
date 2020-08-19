@@ -1,6 +1,6 @@
 {
 	"name": "@natlibfi/melinda-rest-api-client-js",
-	"description": "Melinda's rest api client",
+	"description": "Javascript client for Melinda REST API",
 	"author": {
 		"name": "The National Library of Finland"
 	},
@@ -36,7 +36,7 @@
 	"dependencies": {
 		"@natlibfi/marc-record": "6.0.2",
 		"@natlibfi/melinda-commons": "^9.0.0-alpha.2",
-		"@natlibfi/melinda-backend-commons": "^1.0.2",
+		"debug": "4.1.1",
 		"http-status": "^1.4.2",
 		"node-fetch": "^2.6.0"
 	},
@@ -44,6 +44,7 @@
 		"@babel/cli": "^7.10.1",
 		"@babel/core": "^7.10.1",
 		"@babel/node": "^7.10.1",
+		"@babel/plugin-transform-runtime": "^7.11.0",
 		"@babel/preset-env": "^7.10.1",
 		"@babel/register": "^7.10.1",
 		"@natlibfi/eslint-config-melinda-backend": "^1.0.3",
@@ -65,11 +66,19 @@
 		"extends": "@natlibfi/melinda-backend"
 	},
 	"babel": {
+		"plugins": [
+			[
+				"@babel/transform-runtime"
+			]
+		],
 		"presets": [
 			[
 				"@babel/preset-env",
 				{
-					"targets": "maintained node versions"
+					"targets": [
+						"defaults",
+						"maintained node versions"
+					]
 				}
 			]
 		],
