@@ -1,5 +1,5 @@
 {
-	"name": "@natlibfi/melinda-rest-api-client-js",
+	"name": "@natlibfi/melinda-rest-api-client",
 	"description": "Javascript client for Melinda REST API",
 	"author": {
 		"name": "The National Library of Finland"
