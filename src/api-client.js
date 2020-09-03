@@ -19,32 +19,32 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
     read, create, update, createBulk, readBulk
   };
 
-  function read(recordId) {
+  function read(recordId, accept = 'application/json') {
     debug('Reading record');
-    return doRequest({method: 'get', path: recordId});
+    return doRequest({method: 'get', path: recordId, accept});
   }
 
-  function create(record, params = {noop: 0, unique: 0}) {
+  function create(record, params = {}, accept = 'application/json') {
     debug('Posting create');
-    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: '', accept, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function update(record, id, params = {noop: 0, unique: 0}) {
+  function update(record, id, params = {}, accept = 'application/json') {
     debug(`Posting update ${id}`);
-    return doRequest({method: 'post', path: id, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: id, accept, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function createBulk(stream, streamContentType, params) {
+  function createBulk(stream, streamContentType, params = {}, accept = 'application/json') {
     debug('Posting bulk');
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
+    return doRequest({method: 'post', path: 'bulk/', accept, params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
-  function readBulk(params) {
+  function readBulk(params = {}, accept = 'application/json') {
     debug('Reading bulk metadata');
-    return doRequest({method: 'get', path: 'bulk/', params});
+    return doRequest({method: 'get', path: 'bulk/', accept, params});
   }
 
-  async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
+  async function doRequest({method, path, contentType = 'application/json', accept, params = false, body = null}) {
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
@@ -56,9 +56,9 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
         method,
         headers: {
           'User-Agent': userAgent,
-          'content-type': contentType,
+          'Content-Type': contentType,
           Authorization,
-          Accept: 'application/json'
+          Accept: accept
         },
         body
       });
