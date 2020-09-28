@@ -101,7 +101,11 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
       throw new ApiError(response.status);
     } catch (error) {
       debug('Api-client Error');
+      debug(error.stack);
+
       if (error instanceof ApiError) { // eslint-disable-line functional/no-conditional-statement
+        debug(error.code);
+        debug(error.payload);
         throw error;
       }
 
