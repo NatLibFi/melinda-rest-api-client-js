@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import httpStatus from 'http-status';
-import {URL} from 'url';
+import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
 import createDebugLogger from 'debug';
 import {MarcRecord} from '@natlibfi/marc-record';
@@ -19,32 +19,32 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
     read, create, update, createBulk, readBulk
   };
 
-  function read(recordId, accept = 'application/json') {
+  function read(recordId) {
     debug('Reading record');
-    return doRequest({method: 'get', path: recordId, accept});
+    return doRequest({method: 'get', path: recordId});
   }
 
-  function create(record, params = {}, accept = 'application/json') {
+  function create(record, params = {noop: 0, unique: 0}) {
     debug('Posting create');
-    return doRequest({method: 'post', path: '', accept, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function update(record, id, params = {}, accept = 'application/json') {
+  function update(record, id, params = {noop: 0, unique: 0}) {
     debug(`Posting update ${id}`);
-    return doRequest({method: 'post', path: id, accept, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: id, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function createBulk(stream, streamContentType, params = {}, accept = 'application/json') {
+  function createBulk(stream, streamContentType, params) {
     debug('Posting bulk');
-    return doRequest({method: 'post', path: 'bulk/', accept, params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
-  function readBulk(params = {}, accept = 'application/json') {
+  function readBulk(params) {
     debug('Reading bulk metadata');
-    return doRequest({method: 'get', path: 'bulk/', accept, params});
+    return doRequest({method: 'get', path: 'bulk/', params});
   }
 
-  async function doRequest({method, path, contentType = 'application/json', accept, params = false, body = null}) {
+  async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
@@ -56,9 +56,9 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
         method,
         headers: {
           'User-Agent': userAgent,
-          'Content-Type': contentType,
+          'content-type': contentType,
           Authorization,
-          Accept: accept
+          Accept: 'application/json'
         },
         body
       });
@@ -101,11 +101,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
       throw new ApiError(response.status);
     } catch (error) {
       debug('Api-client Error');
-      debug(error.stack);
-
       if (error instanceof ApiError) { // eslint-disable-line functional/no-conditional-statement
-        debug(error.code);
-        debug(error.payload);
         throw error;
       }
 
