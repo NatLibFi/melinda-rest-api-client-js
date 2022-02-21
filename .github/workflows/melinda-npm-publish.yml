@@ -8,7 +8,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: kk
+    container: docker://node:14
     steps:
       - uses: melinda-node-tests.yml
       - uses: actions/checkout@v2
