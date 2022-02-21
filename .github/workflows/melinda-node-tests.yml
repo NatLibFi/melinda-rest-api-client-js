@@ -2,12 +2,13 @@
 
 name: Melinda node tests
 
-on: [push, workflow_call]
+on: push
 
 jobs:
   build-node-versions:
     name: Node version matrix
-    runs-on: kk
+    runs-on: ubuntu-latest
+    container: docker://node:14
 
     strategy:
       matrix:
@@ -31,7 +32,8 @@ jobs:
 
   njsscan:
     name: Njsscan-check
-    runs-on: kk
+    runs-on: ubuntu-latest
+    container: docker://node:14
 
     steps:
     - name: Checkout the code
@@ -43,8 +45,10 @@ jobs:
         args: '.'
 
   build:
-    needs: [build-node-versions, njsscan]
-    runs-on: kk
+    needs: [build-node-versions, Njsscan-check]
+    runs-on: ubuntu-latest
+    container: docker://node:14
+    if: ${{ github.events.tags === v* }}
 
     steps:
     - name: Echo github obj
