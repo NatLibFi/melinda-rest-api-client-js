@@ -53,6 +53,7 @@ on:
     tags:
      - v[1-9]+.*
 
+jobs:
   publish-npm:
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
