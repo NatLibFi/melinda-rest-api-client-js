@@ -44,11 +44,19 @@ jobs:
       with:
         args: '.'
 
+---
+
+name: Melinda node publish
+
+on:
+  push:
+    tags:
+     - v[1-9]+.*
+
   publish-npm:
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
     # container: docker://node:14
-    if: ${{ startsWith(github.ref_name, 'v[2-9]+.*') }}
 
     steps:
     - name: Echo github obj
@@ -67,3 +75,4 @@ jobs:
       # - run: npm publish
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.MELINDA_REST_API_CLIENT_NPM_TOKEN }}
+...
