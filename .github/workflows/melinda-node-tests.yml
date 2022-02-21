@@ -48,13 +48,13 @@ jobs:
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
     # container: docker://node:14
-    if: ${{ github.ref_name == 'v[1-9]+.*' }}
+    if: ${{ github.ref_name }}
 
     steps:
     - name: Echo github obj
       run: |
           cat << OBJECT
-          ${{ toJson(github) }}
+          ${{ toJson(github.ref_name) }}
           OBJECT
       # - uses: melinda-node-tests.yml
       # - uses: actions/checkout@v2
