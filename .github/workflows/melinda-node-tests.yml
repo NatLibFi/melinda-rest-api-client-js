@@ -7,8 +7,7 @@ on: [push, workflow_call]
 jobs:
   build-node-versions:
     name: Node version matrix
-    runs-on: [self-hosted, linux, kk]
-    container: docker://node:14
+    runs-on: kk
 
     strategy:
       matrix:
@@ -32,8 +31,7 @@ jobs:
 
   njsscan:
     name: Njsscan-check
-    runs-on: [self-hosted, linux, kk]
-    container: docker://node:14
+    runs-on: kk
 
     steps:
     - name: Checkout the code
@@ -46,8 +44,7 @@ jobs:
 
   build:
     needs: [build-node-versions, njsscan]
-    runs-on: [self-hosted, linux, kk]
-    container: docker://node:14
+    runs-on: kk
 
     steps:
     - name: Echo github obj
