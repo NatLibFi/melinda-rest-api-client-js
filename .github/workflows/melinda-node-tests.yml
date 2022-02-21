@@ -44,10 +44,10 @@ jobs:
       with:
         args: '.'
 
-  build:
+  publish-npm:
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
-    container: docker://node:14
+    # container: docker://node:14
     # if: ${{ github.events.tags === v* }}
 
     steps:
