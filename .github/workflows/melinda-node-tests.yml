@@ -52,7 +52,10 @@ jobs:
 
     steps:
     - name: Echo github obj
-      run: echo ${{ toJson(github) }}
+      run: |
+          cat << OBJECT
+          ${{ toJson(github) }}
+          OBJECT
       # - uses: melinda-node-tests.yml
       # - uses: actions/checkout@v2
       # # Setup .npmrc file to publish to npm
