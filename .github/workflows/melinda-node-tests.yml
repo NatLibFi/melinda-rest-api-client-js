@@ -48,7 +48,7 @@ jobs:
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
     # container: docker://node:14
-    if: github.ref_name == v[1-9]+.*
+    if: ${{ github.ref_name == v[1-9]+.* }}
 
     steps:
     - name: Echo github obj
