@@ -16,7 +16,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
   const defaultParamsPrio = cataloger ? {cataloger} : {};
 
   return {
-    read, create, update, createBulk, readBulk
+    read, create, update, createBulk, creteBulkNoStream, sendRecordToBulk, readBulk
   };
 
   function read(recordId) {
@@ -35,8 +35,17 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
   }
 
   function createBulk(stream, streamContentType, params) {
-    debug('Posting bulk');
+    debug('Posting bulk stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
+  }
+
+  function creteBulkNoStream(contentType, params) {
+    debug('Posting bulk stream');
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType});
+  }
+
+  function sendRecordToBulk(correlationId, contentType, record) {
+    return doRequest({method: 'post', path: `bulk/${correlationId}`, params: {...defaultParamsBulk, ...params}, contentType, body: record});
   }
 
   function readBulk(params) {
