@@ -45,7 +45,7 @@ jobs:
         args: '.'
 
   build:
-    needs: [build-node-versions, Njsscan-check]
+    needs: [build-node-versions, njsscan]
     runs-on: [self-hosted, linux, kk]
     container: docker://node:14
 
