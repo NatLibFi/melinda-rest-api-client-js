@@ -45,7 +45,7 @@ jobs:
         args: '.'
 
   build:
-    needs: [build-node-versions, Njsscan-check]
+    needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
     container: docker://node:14
     # if: ${{ github.events.tags === v* }}
