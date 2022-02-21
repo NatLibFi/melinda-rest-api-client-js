@@ -2,7 +2,7 @@
 
 name: Melinda node tests
 
-on: push
+on: [push, workflow_call]
 
 jobs:
   build-node-versions:

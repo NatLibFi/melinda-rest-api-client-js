@@ -2,9 +2,7 @@
 name: Melinda npm publish
 
 on:
-  workflow_run:
-    workflows: ["Melinda node tests"]
-    types: [completed]
+  push:
     tags:
       - v*
 
@@ -12,6 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: ./.github/actions/melinda-node-tests
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
