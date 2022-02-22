@@ -2,10 +2,7 @@
 
 name: Melinda-node-tests
 
-on:
-  push:
-    tags-ignore:
-      - v[1-9]+.*
+on: push
 
 jobs:
   build-node-versions:
