@@ -16,7 +16,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
   const defaultParamsPrio = cataloger ? {cataloger} : {};
 
   return {
-    read, create, update, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk
+    read, create, update, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
   };
 
   function read(recordId) {
@@ -55,6 +55,10 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
   function readBulk(params) {
     debug('Reading bulk metadata');
     return doRequest({method: 'get', path: 'bulk/', params});
+  }
+
+  function getBulkState(correlationId) {
+    return doRequest({method: 'get', path: `bulk/state/${correlationId}`});
   }
 
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
