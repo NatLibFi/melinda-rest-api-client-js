@@ -8,7 +8,6 @@ jobs:
   build-node-versions:
     name: Node version matrix
     runs-on: ubuntu-latest
-    container: docker://node:14
 
     strategy:
       matrix:
