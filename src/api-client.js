@@ -44,7 +44,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType});
   }
 
-  function sendRecordToBulk(correlationId, contentType, record) {
+  function sendRecordToBulk(record, correlationId, contentType) {
     return doRequest({method: 'post', path: `bulk/${correlationId}`, contentType, body: record});
   }
 
