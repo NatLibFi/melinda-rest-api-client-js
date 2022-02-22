@@ -44,7 +44,6 @@ jobs:
       with:
         args: '.'
 
-
   publish:
     runs-on: ubuntu-latest
     needs: [build-node-versions, njsscan]
