@@ -41,7 +41,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
 
   function creteBulkNoStream(contentType, params) {
     debug('Posting bulk stream');
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType});
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params, noStream: 1}, contentType});
   }
 
   function setBulkStatus(correlationId, status) {
