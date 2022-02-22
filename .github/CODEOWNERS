@@ -1,0 +1,4 @@
+# With this line @NatLibFi owns any files in the /.github/
+# directory at the root of the repository and any of its
+# subdirectories.
+/.github/ @NatLibFi
