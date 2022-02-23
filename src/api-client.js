@@ -8,9 +8,9 @@ import {MarcRecord} from '@natlibfi/marc-record';
 // Change to true when working
 MarcRecord.setValidationOptions({subfieldValues: false});
 
-export function createApiClient({restApiUrl, restApiUsername, restApiPassword, cataloger = false, userAgent = 'Melinda commons API client / Javascript'}) {
+export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, cataloger = false, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:api-client');
-  const Authorization = generateAuthorizationHeader(restApiUsername, restApiPassword);
+  const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
   const defaultParamsBulk = cataloger ? {pCatalogerIn: cataloger} : {};
   const defaultParamsPrio = cataloger ? {cataloger} : {};
@@ -65,7 +65,7 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
-      const url = new URL(`${restApiUrl}${path}${query === '' ? '' : '?'}${query}`);
+      const url = new URL(`${melindaApiUrl}${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
 
