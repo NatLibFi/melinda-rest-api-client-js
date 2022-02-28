@@ -80,7 +80,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
         body
       });
 
-      debug(`${path === 'bulk/' ? 'Bulk' : 'Prio'} ${method} status: ${response.status}`);
+      debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
         if (path === '') {
@@ -93,7 +93,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
         const data = await response.json();
         debug(`Response data: ${JSON.stringify(data)}`);
 
-        if (path === 'bulk/') {
+        if ((/^bulk\//u).test(path)) {
           if (method === 'post') {
             // Post to bulk
             const value = data.value || data;
