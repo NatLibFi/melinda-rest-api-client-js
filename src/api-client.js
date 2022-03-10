@@ -40,7 +40,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
   }
 
   function creteBulkNoStream(contentType, params) {
-    debug('Posting bulk stream');
+    debug('Posting bulk no stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params, noStream: 1}, contentType});
   }
 
@@ -49,7 +49,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
   }
 
   function sendRecordToBulk(record, correlationId, contentType) {
-    return doRequest({method: 'post', path: `bulk/${correlationId}`, contentType, body: record});
+    return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: record});
   }
 
   function readBulk(params) {
@@ -111,6 +111,10 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
 
         // Validation results & update record
         return data;
+      }
+
+      if (response.status === httpStatus.ACCEPTED) {
+        return response.json();
       }
 
       debug('Invalid response');

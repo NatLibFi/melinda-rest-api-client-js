@@ -3,10 +3,10 @@ import httpStatus from 'http-status';
 import {promisify} from 'util';
 import createDebugLogger from 'debug';
 
-const debug = createDebugLogger('@natlibfi/melinda-import-importer:pollMelindaRestApi');
-const setTimeoutPromise = promisify(setTimeout);
+export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnStateChange = false, pollTime = 3000) {
+  const debug = createDebugLogger('@natlibfi/melinda-import-importer:pollMelindaRestApi');
+  const setTimeoutPromise = promisify(setTimeout);
 
-export function pollMelindaRestApi(melindaApiClient, correlationId, pollTime = 3000) {
   return pollResult();
 
   async function pollResult(modificationTime = null, wait = false) {
@@ -25,11 +25,6 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, pollTime = 3
       const [bulkData] = data;
       //debug(`bulkData: ${JSON.stringify(bulkData)}`);
 
-      if (bulkData.queueItemState === 'DONE' || bulkData.queueItemState === 'ERROR') {
-        debug('Bulk state DONE');
-        return melindaApiClient.readBulk({id: correlationId});
-      }
-
       if (modificationTime === null) {
         debug(`State: ${bulkData.queueItemState}, setting modification time: ${JSON.stringify(bulkData.modificationTime)}`);
         return pollResult(bulkData.modificationTime, false);
@@ -37,6 +32,15 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, pollTime = 3
 
       if (modificationTime === bulkData.modificationTime) {
         return pollResult(bulkData.modificationTime, true);
+      }
+
+      if (breakLoopOnStateChange && modificationTime !== modificationTime) {
+        return melindaApiClient.readBulk({id: correlationId});
+      }
+
+      if (bulkData.queueItemState === 'DONE' || bulkData.queueItemState === 'ERROR') {
+        debug('Bulk state DONE');
+        return melindaApiClient.readBulk({id: correlationId});
       }
 
       debug(`State: ${bulkData.queueItemState}, modification time: ${bulkData.modificationTime}${bulkData.handledIds ? ` , Ids handled: ${bulkData.handledIds.length}` : ''}`);
