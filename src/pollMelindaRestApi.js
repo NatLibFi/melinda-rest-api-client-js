@@ -1,6 +1,6 @@
-import { Error as ApiError } from '@natlibfi/melinda-commons';
+import {Error as ApiError} from '@natlibfi/melinda-commons';
 import httpStatus from 'http-status';
-import { promisify } from 'util';
+import {promisify} from 'util';
 import createDebugLogger from 'debug';
 
 export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnStateChange = false, pollTime = 3000) {
@@ -23,7 +23,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
 
       if (finalBulkStates.includes(bulkData.queueItemState)) {
         debug(`Bulk final state ${bulkData.queueItemState}`);
-        const [bulkMetadata] = await melindaApiClient.readBulk({ id: correlationId });
+        const [bulkMetadata] = await melindaApiClient.readBulk({id: correlationId});
         return bulkMetadata;
       }
 
@@ -37,7 +37,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
       }
 
       if (breakLoopOnStateChange && modificationTime !== bulkData.modificationTime) {
-        const [bulkMetadata] = await melindaApiClient.readBulk({ id: correlationId });
+        const [bulkMetadata] = await melindaApiClient.readBulk({id: correlationId});
         return bulkMetadata;
       }
 
