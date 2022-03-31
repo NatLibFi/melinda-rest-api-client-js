@@ -1,13 +1,14 @@
-import {Error as ApiError} from '@natlibfi/melinda-commons';
+import { Error as ApiError } from '@natlibfi/melinda-commons';
 import httpStatus from 'http-status';
-import {promisify} from 'util';
+import { promisify } from 'util';
 import createDebugLogger from 'debug';
 
 export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnStateChange = false, pollTime = 3000) {
   const debug = createDebugLogger('@natlibfi/melinda-import-importer:pollMelindaRestApi');
   const setTimeoutPromise = promisify(setTimeout);
+  const finalBulkStates = ['DONE', 'ERROR', 'ABORT', undefined];
 
-  return pollResult();
+  return pollResult;
 
   async function pollResult(modificationTime = null, wait = false) {
     try {
@@ -16,14 +17,15 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
         return pollResult(modificationTime);
       }
 
-      const data = await melindaApiClient.getBulkState(correlationId);
+      debug(`Polling bulk state: ${correlationId}`);
+      const bulkData = await melindaApiClient.getBulkState(correlationId);
+      debug(`Got bulk state info: ${JSON.stringify(bulkData)}`);
 
-      if (data.length === 0) { // eslint-disable-line functional/no-conditional-statement
-        throw new ApiError(httpStatus.NOT_FOUND, `Queue item ${correlationId} not found!`);
+      if (finalBulkStates.includes(bulkData.queueItemState)) {
+        debug(`Bulk final state ${bulkData.queueItemState}`);
+        const [bulkMetadata] = await melindaApiClient.readBulk({ id: correlationId });
+        return bulkMetadata;
       }
-
-      const [bulkData] = data;
-      //debug(`bulkData: ${JSON.stringify(bulkData)}`);
 
       if (modificationTime === null) {
         debug(`State: ${bulkData.queueItemState}, setting modification time: ${JSON.stringify(bulkData.modificationTime)}`);
@@ -34,13 +36,9 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
         return pollResult(bulkData.modificationTime, true);
       }
 
-      if (breakLoopOnStateChange && modificationTime !== modificationTime) {
-        return melindaApiClient.readBulk({id: correlationId});
-      }
-
-      if (bulkData.queueItemState === 'DONE' || bulkData.queueItemState === 'ERROR') {
-        debug('Bulk state DONE');
-        return melindaApiClient.readBulk({id: correlationId});
+      if (breakLoopOnStateChange && modificationTime !== bulkData.modificationTime) {
+        const [bulkMetadata] = await melindaApiClient.readBulk({ id: correlationId });
+        return bulkMetadata;
       }
 
       debug(`State: ${bulkData.queueItemState}, modification time: ${bulkData.modificationTime}${bulkData.handledIds ? ` , Ids handled: ${bulkData.handledIds.length}` : ''}`);

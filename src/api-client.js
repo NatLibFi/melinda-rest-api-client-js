@@ -20,44 +20,48 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
   };
 
   function read(recordId) {
-    debug('Reading record');
+    debug('GET record metadata');
     return doRequest({method: 'get', path: recordId});
   }
 
   function create(record, params = {noop: 0, unique: 0}) {
-    debug('Posting create');
+    debug('POST create prio');
     return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function update(record, id, params = {noop: 0, unique: 0}) {
-    debug(`Posting update ${id}`);
-    return doRequest({method: 'post', path: id, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+  function update(record, correlationId, params = {noop: 0, unique: 0}) {
+    debug(`POST update prio ${correlationId}`);
+    return doRequest({method: 'post', path: correlationId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
   function createBulk(stream, streamContentType, params) {
-    debug('Posting bulk stream');
+    debug('POST bulk stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
   function creteBulkNoStream(contentType, params) {
-    debug('Posting bulk no stream');
+    debug('POST bulk no stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params, noStream: 1}, contentType});
   }
 
   function setBulkStatus(correlationId, status) {
+    debug(`PUT bulk status ${correlationId}`);
     return doRequest({method: 'put', path: `bulk/state/${correlationId}`, params: {status}});
   }
 
   function sendRecordToBulk(record, correlationId, contentType) {
-    return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: record});
+    debug(`POST record to bulk ${correlationId}`);
+    //debug(JSON.stringify(record));
+    return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record)});
   }
 
   function readBulk(params) {
-    debug('Reading bulk metadata');
+    debug('GET bulk metadata');
     return doRequest({method: 'get', path: 'bulk/', params});
   }
 
   function getBulkState(correlationId) {
+    debug(`GET bulk state ${correlationId}`);
     return doRequest({method: 'get', path: `bulk/state/${correlationId}`});
   }
 
@@ -94,6 +98,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
         debug(`Response data: ${JSON.stringify(data)}`);
 
         if ((/^bulk\//u).test(path)) {
+          debug('Handling bulk response');
           if (method === 'post') {
             // Post to bulk
             const value = data.value || data;
@@ -114,6 +119,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
       }
 
       if (response.status === httpStatus.ACCEPTED) {
+        debug('Handling prio response ACCEPTED');
         return response.json();
       }
 
