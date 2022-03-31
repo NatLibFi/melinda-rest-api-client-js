@@ -4,7 +4,7 @@ import {promisify} from 'util';
 import createDebugLogger from 'debug';
 
 export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnStateChange = false, pollTime = 3000) {
-  const debug = createDebugLogger('@natlibfi/melinda-import-importer:pollMelindaRestApi');
+  const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi');
   const setTimeoutPromise = promisify(setTimeout);
   const finalBulkStates = ['DONE', 'ERROR', 'ABORT', undefined];
 

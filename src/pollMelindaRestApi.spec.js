@@ -5,7 +5,7 @@ import {pollMelindaRestApi} from './pollMelindaRestApi';
 import createDebugLogger from 'debug';
 import {createApiClient} from './api-client';
 
-const debug = createDebugLogger('@natlibfi/melinda-import-importer:pollMelindaRestApi:test');
+const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi:test');
 const melindaApiClient = createApiClient({
   melindaApiUrl: 'http://foo.bar/',
   melindaApiUsername: 'foo',
@@ -29,7 +29,8 @@ async function callback({getFixture, enabled = true, correlationId}) {
   }
   debug(correlationId);
   const expectedResponse = getFixture('output.json');
-  const response = await pollMelindaRestApi(melindaApiClient, correlationId, 100);
-  //debug(response);
+  const poller = pollMelindaRestApi(melindaApiClient, correlationId, false, 10);
+  const response = await poller();
+  debug(response);
   expect(response).to.deep.equal(expectedResponse);
 }
