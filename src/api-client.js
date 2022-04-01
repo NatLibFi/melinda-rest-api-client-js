@@ -4,6 +4,7 @@ import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
 import createDebugLogger from 'debug';
 import {MarcRecord} from '@natlibfi/marc-record';
+import {checkStatus} from './errorResponseHandler';
 
 // Change to true when working
 MarcRecord.setValidationOptions({subfieldValues: false});
@@ -85,6 +86,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
       });
 
       debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
+      checkStatus(response);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
         if (path === '') {
