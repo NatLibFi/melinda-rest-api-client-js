@@ -8,7 +8,7 @@ export async function checkStatus(response) {
 
   // Unauthorized (400)
   if (response.status === httpStatus.BAD_REQUEST) { // eslint-disable-line functional/no-conditional-statement
-    logger.error('Got "UNAUTHORIZED" (401) response from melinda-rest-api.');
+    logger.error('Got "BAD_REQUEST" (400) response from melinda-rest-api.');
     const data = await response.json();
     if (data) {
       logger.error(`${data.message}: ${data.failedParams}`);
