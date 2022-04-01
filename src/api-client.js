@@ -86,7 +86,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
       });
 
       debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
-      checkStatus(response);
+      await checkStatus(response);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
         if (path === '') {

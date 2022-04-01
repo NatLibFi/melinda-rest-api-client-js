@@ -4,7 +4,7 @@ import {Error as ApiError} from '@natlibfi/melinda-commons';
 
 const logger = createLogger();
 
-export function checkStatus(response) {
+export async function checkStatus(response) {
 
   // Unauthorized (400)
   if (response.status === httpStatus.BAD_REQUEST) { // eslint-disable-line functional/no-conditional-statement
