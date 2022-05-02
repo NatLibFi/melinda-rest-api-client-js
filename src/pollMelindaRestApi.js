@@ -41,7 +41,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
         return bulkMetadata;
       }
 
-      debug(`State: ${bulkData.queueItemState}, modification time: ${bulkData.modificationTime}${bulkData.handledIds ? ` , Ids handled: ${bulkData.handledIds.length}` : ''}`);
+      debug(`State: ${bulkData.queueItemState}, modification time: ${bulkData.modificationTime}${bulkData.records ? ` , Records handled: ${bulkData.records.length}` : ''}`);
       return pollResult(bulkData.modificationTime, true);
     } catch (error) {
       if (error instanceof ApiError) {
