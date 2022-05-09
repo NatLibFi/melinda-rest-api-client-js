@@ -93,7 +93,7 @@ export function createApiClient({melindaApiUrl, melindaApiUsername, melindaApiPa
           // Create new record
           const recordId = response.headers.get('Record-ID') || undefined;
           debug(`Response data: ${JSON.stringify(recordId)}`);
-          return {recordId};
+          return {recordId, status: response.status};
         }
 
         const data = await response.json();
