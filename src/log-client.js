@@ -2,6 +2,8 @@ import fetch from 'node-fetch';
 import httpStatus from 'http-status';
 import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
+import createDebugLogger from 'debug';
+import {checkStatus} from './errorResponseHandler';
 
 export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:log-client');
@@ -12,14 +14,12 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   };
 
   function getMergeLog({skip, blobSequence}) {
-    debug(`POST record to bulk ${correlationId}`);
-    //debug(JSON.stringify(record));
+    debug(`GET merge log skip: ${skip}, blobSequence: ${blobSequence}`);
     return doRequest({method: 'get', path: `bulk/logs/`, params: {skip, blobSequence}});
   }
 
   function getMergeLogByCorrelationid({correlationId, blobSequence}) {
-    debug(`POST record to bulk ${correlationId}`);
-    //debug(JSON.stringify(record));
+    debug(`GET merge log by correlationId: ${correlationId}, blobSequence: ${blobSequence}`);
     return doRequest({method: 'get', path: `bulk/logs/${correlationId}`, params: {blobSequence}});
   }
 
@@ -49,7 +49,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
       //logic here
       if (response.status === httpStatus.OK) {
-        return response
+        return response;
       }
 
       debug('Invalid response');

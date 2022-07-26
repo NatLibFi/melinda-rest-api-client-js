@@ -3,10 +3,10 @@ import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen-http-client';
 import {pollMelindaRestApi} from './pollMelindaRestApi';
 import createDebugLogger from 'debug';
-import {createApiClient} from './api-client';
+import {createMelindaApiRecordClient} from './record-client';
 
 const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi:test');
-const melindaApiClient = createApiClient({
+const melindaApiClient = createMelindaApiRecordClient({
   melindaApiUrl: 'http://foo.bar/',
   melindaApiUsername: 'foo',
   melindaApiPassword: 'bar'
