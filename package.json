@@ -13,7 +13,7 @@
 		"type": "git",
 		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
 	},
-	"license": "LGPL-3.0+",
+	"license": "MIT",
 	"version": "2.1.0-alpha.12",
 	"main": "./dist/index.js",
 	"engines": {

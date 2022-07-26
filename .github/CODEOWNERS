@@ -8,3 +8,6 @@
 # directory at the root of the repository and any of its
 # subdirectories.
 /src/ @NatLibFi/melinda-js-lead
+
+# With this line @NatLibFi/melinda-js-lead owns package.json file
+/package.json @NatLibFi/melinda-js-lead
