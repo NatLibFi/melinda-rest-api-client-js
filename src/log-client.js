@@ -10,17 +10,11 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
   return {
-    getMergeLog, getMergeLogByCorrelationid
+    getLog
   };
 
-  function getMergeLog({skip, blobSequence}) {
-    debug(`GET merge log skip: ${skip}, blobSequence: ${blobSequence}`);
-    return doRequest({method: 'get', path: `bulk/logs/`, params: {skip, blobSequence}});
-  }
-
-  function getMergeLogByCorrelationid({correlationId, blobSequence}) {
-    debug(`GET merge log by correlationId: ${correlationId}, blobSequence: ${blobSequence}`);
-    return doRequest({method: 'get', path: `bulk/logs/${correlationId}`, params: {blobSequence}});
+  function getLog(params) {
+    return doRequest({method: 'get', path: `bulk/logs`, params});
   }
 
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
@@ -49,7 +43,9 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
       //logic here
       if (response.status === httpStatus.OK) {
-        return response;
+        const result = await response.json();
+        debug(`result: ${JSON.stringify(result)}`);
+        return result;
       }
 
       debug('Invalid response');
