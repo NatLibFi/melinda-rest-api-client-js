@@ -14,7 +14,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   };
 
   function getLog(params) {
-    return doRequest({method: 'get', path: `bulk/logs`, params});
+    return doRequest({method: 'get', path: 'logs', params});
   }
 
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
