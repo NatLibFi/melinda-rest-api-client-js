@@ -89,13 +89,6 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       await checkStatus(response);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
-        if (path === '') {
-          // Create new record
-          const recordId = response.headers.get('Record-ID') || undefined;
-          debug(`Response data: ${JSON.stringify(recordId)}`);
-          return {recordId, status: response.status};
-        }
-
         const data = await response.json();
         debug(`Response data: ${JSON.stringify(data)}`);
 
@@ -116,12 +109,17 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
           return {record};
         }
 
+        // Create new record
         // Validation results & update record
         return data;
       }
 
       if (response.status === httpStatus.ACCEPTED) {
-        debug('Handling prio response ACCEPTED');
+        debug('Handling bulk response ACCEPTED');
+        return response.json();
+      }
+
+      if (response.status === httpStatus.CONFLICT) {
         return response.json();
       }
 
