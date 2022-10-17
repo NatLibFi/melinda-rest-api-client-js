@@ -10,11 +10,19 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
   return {
-    getLog
+    getLog, protectLog, removeLog
   };
 
   function getLog(params) {
     return doRequest({method: 'get', path: 'logs', params});
+  }
+
+  function protectLog(correlationId, params) {
+    return doRequest({method: 'put', path: `logs/${correlationId}`, params});
+  }
+
+  function protectLog(correlationId, params) {
+    return doRequest({method: 'delete', path: `logs/${correlationId}`, params});
   }
 
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
