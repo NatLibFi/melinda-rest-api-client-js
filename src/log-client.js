@@ -21,7 +21,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
     return doRequest({method: 'put', path: `logs/${correlationId}`, params});
   }
 
-  function protectLog(correlationId, params) {
+  function removeLog(correlationId, params) {
     return doRequest({method: 'delete', path: `logs/${correlationId}`, params});
   }
 
