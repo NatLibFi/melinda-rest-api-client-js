@@ -11,3 +11,4 @@
 
 # With this line @NatLibFi/melinda-js-lead owns package.json file
 /package.json @NatLibFi/melinda-js-lead
+/package-lock.json @NatLibFi/melinda-js-lead
