@@ -4,60 +4,73 @@ import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
 import createDebugLogger from 'debug';
 import {MarcRecord} from '@natlibfi/marc-record';
+import {checkStatus} from './errorResponseHandler';
 
 // Change to true when working
 MarcRecord.setValidationOptions({subfieldValues: false});
 
-export function createApiClient({restApiUrl, restApiUsername, restApiPassword, cataloger = false, userAgent = 'Melinda commons API client / Javascript'}) {
+export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, cataloger = false, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:api-client');
-  const Authorization = generateAuthorizationHeader(restApiUsername, restApiPassword);
+  const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
   const defaultParamsBulk = cataloger ? {pCatalogerIn: cataloger} : {};
   const defaultParamsPrio = cataloger ? {cataloger} : {};
 
   return {
-    read, create, update, createBulk, creteBulkNoStream, sendRecordToBulk, readBulk
+    read, create, update, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
   };
 
   function read(recordId) {
-    debug('Reading record');
+    debug('GET record metadata');
     return doRequest({method: 'get', path: recordId});
   }
 
   function create(record, params = {noop: 0, unique: 0}) {
-    debug('Posting create');
+    debug('POST create prio');
     return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function update(record, id, params = {noop: 0, unique: 0}) {
-    debug(`Posting update ${id}`);
-    return doRequest({method: 'post', path: id, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+  function update(record, correlationId, params = {noop: 0, unique: 0}) {
+    debug(`POST update prio ${correlationId}`);
+    return doRequest({method: 'post', path: correlationId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
   function createBulk(stream, streamContentType, params) {
-    debug('Posting bulk stream');
+    debug('POST bulk stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
   function creteBulkNoStream(contentType, params) {
-    debug('Posting bulk stream');
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType});
+    debug('POST bulk no stream');
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params, noStream: 1}, contentType});
+  }
+
+  function setBulkStatus(correlationId, status) {
+    debug(`PUT bulk status ${correlationId}`);
+    return doRequest({method: 'put', path: `bulk/state/${correlationId}`, params: {status}});
   }
 
   function sendRecordToBulk(record, correlationId, contentType) {
-    return doRequest({method: 'post', path: `bulk/${correlationId}`, contentType, body: record});
+    debug(`POST record to bulk ${correlationId}`);
+    //debug(JSON.stringify(record));
+    return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record)});
   }
 
   function readBulk(params) {
-    debug('Reading bulk metadata');
+    debug('GET bulk metadata');
     return doRequest({method: 'get', path: 'bulk/', params});
+  }
+
+  function getBulkState(correlationId) {
+    debug(`GET bulk state ${correlationId}`);
+    return doRequest({method: 'get', path: `bulk/state/${correlationId}`});
   }
 
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
-      const url = new URL(`${restApiUrl}${path}${query === '' ? '' : '?'}${query}`);
+      const url = new URL(`${melindaApiUrl}${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
 
@@ -72,20 +85,15 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
         body
       });
 
-      debug(`${path === 'bulk/' ? 'Bulk' : 'Prio'} ${method} status: ${response.status}`);
+      debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
+      await checkStatus(response);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
-        if (path === '') {
-          // Create new record
-          const recordId = response.headers.get('Record-ID') || undefined;
-          debug(`Response data: ${JSON.stringify(recordId)}`);
-          return {recordId};
-        }
-
         const data = await response.json();
         debug(`Response data: ${JSON.stringify(data)}`);
 
-        if (path === 'bulk/') {
+        if ((/^bulk\//u).test(path)) {
+          debug('Handling bulk response');
           if (method === 'post') {
             // Post to bulk
             const value = data.value || data;
@@ -101,8 +109,18 @@ export function createApiClient({restApiUrl, restApiUsername, restApiPassword, c
           return {record};
         }
 
+        // Create new record
         // Validation results & update record
         return data;
+      }
+
+      if (response.status === httpStatus.ACCEPTED) {
+        debug('Handling bulk response ACCEPTED');
+        return response.json();
+      }
+
+      if (response.status === httpStatus.CONFLICT) {
+        return response.json();
       }
 
       debug('Invalid response');

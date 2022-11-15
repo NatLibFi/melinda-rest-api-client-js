@@ -26,6 +26,7 @@
 *
 */
 
-import {createApiClient} from './api-client';
-
-export {createApiClient};
+import {createMelindaApiRecordClient} from './record-client';
+import {createMelindaApiLogClient} from './log-client';
+import {pollMelindaRestApi} from './pollMelindaRestApi';
+export {createMelindaApiRecordClient, createMelindaApiLogClient, pollMelindaRestApi};
