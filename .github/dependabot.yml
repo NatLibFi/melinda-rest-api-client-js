@@ -20,7 +20,7 @@ updates:
       timezone: "Europe/Helsinki"
     versioning-strategy: lockfile-only
     labels:
-      - "npm minor dependencies"
+      - "dependencies"
     allow:
       - dependency-type: "production"
 
