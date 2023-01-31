@@ -48,7 +48,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
         body
       });
 
-      debug(`${method}, path: ${path}, params: ${params}, status: ${response.status}`);
+      debug(`${method}, path: ${path}, params: ${JSON.stringify(params)}, status: ${response.status}`);
 
       // log status check?
       await checkStatus(response);
