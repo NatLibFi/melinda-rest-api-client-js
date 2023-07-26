@@ -65,7 +65,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
       throw new ApiError(response.status);
     } catch (error) {
       debug('Api-client Error');
-      if (error instanceof ApiError) { // eslint-disable-line functional/no-conditional-statement
+      if (error instanceof ApiError) { // eslint-disable-line functional/no-conditional-statements
         throw error;
       }
 
