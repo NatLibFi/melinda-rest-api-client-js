@@ -38,7 +38,7 @@
 		"@natlibfi/melinda-backend-commons": "^2.2.1",
 		"@natlibfi/melinda-commons": "^13.0.6",
 		"debug": "^4.3.4",
-		"http-status": "^1.6.2",
+		"http-status": "^1.7.0",
 		"node-fetch": "^2.7.0"
 	},
 	"devDependencies": {
