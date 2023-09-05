@@ -25,14 +25,14 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     return doRequest({method: 'get', path: recordId});
   }
 
-  function create(record, params = {noop: 0, unique: 0}) {
+  function create(record, params = {noop: 0, unique: 0, merge: 0}) {
     debug('POST create prio');
     return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
-  function update(record, correlationId, params = {noop: 0, unique: 0}) {
-    debug(`POST update prio ${correlationId}`);
-    return doRequest({method: 'post', path: correlationId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+  function update(record, recordId, params = {noop: 0, cataloger: undefined}) {
+    debug(`POST update prio ${recordId}`);
+    return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
   function createBulk(stream, streamContentType, params) {
