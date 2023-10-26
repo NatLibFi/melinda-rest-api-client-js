@@ -20,52 +20,122 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     read, create, update, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
   };
 
+  /**
+     * Get Record data by Melinda-ID
+     * @param {string} Record Melinda-ID
+     * @returns Record JSON object
+     */
   function read(recordId) {
     debug('GET record metadata');
     return doRequest({method: 'get', path: recordId});
   }
 
+  /**
+   * Send new record to be saved in Melinda
+   * @param {object} Record data in Json format
+   * @param {object} Params: {
+   * noop: <integer> 0|1 No operation (operate but don't save, AKA dry run)
+   * unique: <integer> 0|1 Handle only if new record
+   * merge: <integer> 0|1 if not new record, try to merge with existing
+   * }
+   * @returns <Description return value>
+   */
   function create(record, params = {noop: 0, unique: 0, merge: 0}) {
     debug('POST create prio');
     return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
+  /**
+   * Send update to record in Melinda
+   * @param {object} Record data in Json format
+   * @param {string} Record Melinda-ID
+   * @param {object} Params {
+   * noop: <integer> 0|1 No operation (operate but don't save, AKA dry run)
+   * cataloger: <sring> Cataloger identifier for CAT field
+   * }
+   * @returns <Description return value>
+   */
   function update(record, recordId, params = {noop: 0, cataloger: undefined}) {
     debug(`POST update prio ${recordId}`);
     return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
+  /**
+   * Upload single file Bulk operation
+   * @param {stream} File data stream
+   * @param {string} Stream content type for handling conversion
+   * @param {object} Params {
+   * pCatalogerIn: <sring> Cataloger identifier for CAT field
+   * }
+   * @returns <Description return value>
+   */
   function createBulk(stream, streamContentType, params) {
     debug('POST bulk stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
+  /**
+   * <Description>
+   * @param {<type>} <Description 1st parameter>
+   * @param {<type>} <Description 2nd parameter>
+   * @returns <Description return value>
+   */
   function creteBulkNoStream(contentType, params) {
     debug('POST bulk no stream');
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params, noStream: 1}, contentType});
   }
 
+  /**
+   * <Description>
+   * @param {<type>} <Description 1st parameter>
+   * @param {<type>} <Description 2nd parameter>
+   * @returns <Description return value>
+   */
   function setBulkStatus(correlationId, status) {
     debug(`PUT bulk status ${correlationId}`);
     return doRequest({method: 'put', path: `bulk/state/${correlationId}`, params: {status}});
   }
 
+  /**
+   * <Description>
+   * @param {<type>} <Description 1st parameter>
+   * @param {<type>} <Description 2nd parameter>
+   * @returns <Description return value>
+   */
   function sendRecordToBulk(record, correlationId, contentType) {
     debug(`POST record to bulk ${correlationId}`);
     //debug(JSON.stringify(record));
     return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record)});
   }
 
+  /**
+   * <Description>
+   * @param {<type>} <Description 1st parameter>
+   * @param {<type>} <Description 2nd parameter>
+   * @returns <Description return value>
+   */
   function readBulk(params) {
     debug('GET bulk metadata');
     return doRequest({method: 'get', path: 'bulk/', params});
   }
 
+  /**
+   * <Description>
+   * @param {<type>} <Description 1st parameter>
+   * @param {<type>} <Description 2nd parameter>
+   * @returns <Description return value>
+   */
   function getBulkState(correlationId) {
     debug(`GET bulk state ${correlationId}`);
     return doRequest({method: 'get', path: `bulk/state/${correlationId}`});
   }
 
+  /**
+   * <Description>
+   * @param {<type>} <Description 1st parameter>
+   * @param {<type>} <Description 2nd parameter>
+   * @returns <Description return value>
+   */
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
     try {
