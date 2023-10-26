@@ -17,21 +17,21 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
    * Get catalogers who has made logs
    * @returns List on catalogers based on search params
    */
-  function getCatalogers(params) {
+  function getCatalogers() {
     return doRequest({method: 'get', path: 'logs/catalogers'});
   }
 
   /**
    * Get specific log item
    * @param {Object} {
-   * correlationId OR id: identifier for log,
-   * logItemType: LOG_ITEM_TYPE constant,
-   * blobSequence: integer sequence for log in correlation,
-   * standardIdentifiers: ISBN etc.,
-   * databaseId: Melinda-ID,
+   * correlationId OR id: {String} identifier for log,
+   * logItemType: {String} LOG_ITEM_TYPE constant,
+   * blobSequence: {Integer} sequence for log in correlation,
+   * standardIdentifiers: {String} ISBN etc.,
+   * databaseId: {String} Melinda-ID,
    * sourceIds: SID,
-   * skip: skip n log items,
-   * limit: Limit results to n log items
+   * skip: {Integer} skip n log items,
+   * limit: {Integer} Limit results to n log items
    * }
    * @returns List of logs based on search params
    */
@@ -41,8 +41,10 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Sets protect flag to logs
-   * @param {string} CorrelationId identifier for log
-   * @param {Object} {blobSequence: integer}
+   * @param {String} CorrelationId identifier for log
+   * @param {Object} {
+   * blobSequence: {Integer} Sequence numer for record log
+   * }
    * @returns {status, payload}
    */
   function protectLog(correlationId, params) {
@@ -51,8 +53,10 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Removes log
-   * @param {string} CorrelationId identifier for log
-   * @param {Object} {force: 0|1}
+   * @param {String} CorrelationId identifier for log
+   * @param {Object} {
+   * force: {Integer} 0|1 Boolean for removal done by force
+   * }
    * @returns {status, payload}
    */
   function removeLog(correlationId, params) {
@@ -62,10 +66,10 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   /**
    * Get list of logs based on search params
    * @param {Object} {
-   * logItemTypes: logItemTypes has comma-separated list of logItemTypes
-   * catalogers: catalogers has comma-separated list of catalogers (1-10 word characters each)
-   * dateBefore: string 'YYYY-MM-DD',
-   * dateAfter:  string 'YYYY-MM-DD'}
+   * logItemTypes: {String} logItemTypes has comma-separated list of logItemTypes
+   * catalogers: {String} catalogers has comma-separated list of catalogers (1-10 word characters each)
+   * dateBefore: {String} 'YYYY-MM-DD',
+   * dateAfter:  {String} 'YYYY-MM-DD'}
    * @returns List matched of logs
    */
   function getLogsList(params) {

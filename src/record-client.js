@@ -50,8 +50,8 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {object} Record data in Json format
    * @param {string} Record Melinda-ID
    * @param {object} Params {
-   * noop: <integer> 0|1 No operation (operate but don't save, AKA dry run)
-   * cataloger: <sring> Cataloger identifier for CAT field
+   * noop: {integer} 0|1 No operation (operate but don't save, AKA dry run)
+   * cataloger: {sring} Cataloger identifier for CAT field
    * }
    * @returns <Description return value>
    */
@@ -65,7 +65,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {stream} File data stream
    * @param {string} Stream content type for handling conversion
    * @param {object} Params {
-   * pCatalogerIn: <sring> Cataloger identifier for CAT field
+   * pCatalogerIn: {sring} Cataloger identifier for CAT field
    * }
    * @returns <Description return value>
    */
@@ -75,9 +75,21 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   /**
-   * <Description>
-   * @param {<type>} <Description 1st parameter>
-   * @param {<type>} <Description 2nd parameter>
+   * Create Bulk queue item in state QUEUE_ITEM_STATE.VALIDATOR.WAITING_FOR_RECORDS (@natlibfi/melinda-rest-api-commons/constants)
+   * @param {string} Content type for records
+   * @param {object} {
+   * pOldNew: {sring} 'NEW' | 'OLD', (NEW = CREATE, OLD = UPDATE)
+   * pActiveLibrary: Aleph library this bulk is ment to go
+   * pCatalogerIn: (Optional) {sring} Cataloger identifier for CAT field,
+   * pRejectFile: (Optional) {sring} Reject file name to be used in server for p_manage_18
+   * pLogFile: (Optional) {sring} Log file name to be used in server for p_manage_18
+   * noop: (Optional) {integer} 0|1 No operation (operate but don't save, AKA dry run)
+   * unique: (Optional) <integer> 0|1 Handle only if new record
+   * merge: (Optional) <integer> 0|1 if not new record, try to merge with existing
+   * validate: (Optional) <integer> 0|1
+   * failOnError: (Optional) <integer> 0|1
+   * skipNoChangeUpdates: (Optional) <integer> 0|1 skip changes that won't change the database record
+   * }
    * @returns <Description return value>
    */
   function creteBulkNoStream(contentType, params) {
