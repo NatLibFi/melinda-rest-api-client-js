@@ -22,7 +22,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
      * Get Record data by Melinda-ID
-     * @param {string} Record Melinda-ID
+     * @param {String} Record Melinda-ID
      * @returns Record JSON object
      */
   function read(recordId) {
@@ -32,26 +32,26 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send new record to be saved in Melinda
-   * @param {object} Record data in Json format
-   * @param {object} Params: {
-   * noop: <integer> 0|1 No operation (operate but don't save, AKA dry run)
-   * unique: <integer> 0|1 Handle only if new record
-   * merge: <integer> 0|1 if not new record, try to merge with existing
+   * @param {Object} Record data in Json format
+   * @param {Object} Params: {
+   * noop: {Integer} 0|1 No operation (operate but don't save, AKA dry run)
+   * unique: {Integer} 0|1 Handle only if new record
+   * merge: {Integer} 0|1 if not new record, try to merge with existing
    * }
    * @returns <Description return value>
    */
   function create(record, params = {noop: 0, unique: 0, merge: 0}) {
     debug('POST create prio');
-    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.Stringify(record, undefined, '')});
   }
 
   /**
    * Send update to record in Melinda
-   * @param {object} Record data in Json format
-   * @param {string} Record Melinda-ID
-   * @param {object} Params {
-   * noop: {integer} 0|1 No operation (operate but don't save, AKA dry run)
-   * cataloger: {sring} Cataloger identifier for CAT field
+   * @param {Object} Record data in Json format
+   * @param {String} Record Melinda-ID
+   * @param {Object} Params {
+   * noop: {Integer} 0|1 No operation (operate but don't save, AKA dry run)
+   * cataloger: {String} Cataloger identifier for CAT field
    * }
    * @returns <Description return value>
    */
@@ -63,9 +63,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   /**
    * Upload single file Bulk operation
    * @param {stream} File data stream
-   * @param {string} Stream content type for handling conversion
-   * @param {object} Params {
-   * pCatalogerIn: {sring} Cataloger identifier for CAT field
+   * @param {String} Content type for handling conversion stream
+   * @param {Object} Params {
+   * pCatalogerIn: {String} Cataloger identifier for CAT field
    * }
    * @returns <Description return value>
    */
@@ -75,20 +75,20 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   /**
-   * Create Bulk queue item in state QUEUE_ITEM_STATE.VALIDATOR.WAITING_FOR_RECORDS (@natlibfi/melinda-rest-api-commons/constants)
-   * @param {string} Content type for records
-   * @param {object} {
-   * pOldNew: {sring} 'NEW' | 'OLD', (NEW = CREATE, OLD = UPDATE)
+   * Create Bulk queue item in state QUEUE_ITEM_STATE.VALIDATOR.WAITING_FOR_RECORDS (@natlibfi/melinda-rest-api-commons/constants/QUEUE_ITEM_STATE)
+   * @param {String} Content type for records
+   * @param {Object} {
+   * pOldNew: {String} 'NEW'|'OLD', (NEW = CREATE, OLD = UPDATE)
    * pActiveLibrary: Aleph library this bulk is ment to go
-   * pCatalogerIn: (Optional) {sring} Cataloger identifier for CAT field,
-   * pRejectFile: (Optional) {sring} Reject file name to be used in server for p_manage_18
-   * pLogFile: (Optional) {sring} Log file name to be used in server for p_manage_18
-   * noop: (Optional) {integer} 0|1 No operation (operate but don't save, AKA dry run)
-   * unique: (Optional) <integer> 0|1 Handle only if new record
-   * merge: (Optional) <integer> 0|1 if not new record, try to merge with existing
-   * validate: (Optional) <integer> 0|1
-   * failOnError: (Optional) <integer> 0|1
-   * skipNoChangeUpdates: (Optional) <integer> 0|1 skip changes that won't change the database record
+   * pCatalogerIn: (Optional) {String} Cataloger identifier for CAT field,
+   * pRejectFile: (Optional) {String} Reject file name to be used in server for p_manage_18
+   * pLogFile: (Optional) {String} Log file name to be used in server for p_manage_18
+   * noop: (Optional) {Integer} 0|1 No operation (operate but don't save, AKA dry run)
+   * unique: (Optional) {Integer} 0|1 Handle only if new record
+   * merge: (Optional) {Integer} 0|1 if not new record, try to merge with existing
+   * validate: (Optional) {Integer} 0|1
+   * failOnError: (Optional) {Integer} 0|1
+   * skipNoChangeUpdates: (Optional) {Integer} 0|1 skip changes that won't change the database record
    * }
    * @returns <Description return value>
    */
@@ -98,9 +98,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   /**
-   * <Description>
-   * @param {<type>} <Description 1st parameter>
-   * @param {<type>} <Description 2nd parameter>
+   * Set queue item state for bulk item
+   * @param {String} CorrelationId identifier for bulk item
+   * @param {String} Status 'PENDING_VALIDATION', 'DONE' or 'ABORT' (@natlibfi/melinda-rest-api-commons/constants/QUEUE_ITEM_STATE)
    * @returns <Description return value>
    */
   function setBulkStatus(correlationId, status) {
@@ -109,9 +109,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   /**
-   * <Description>
-   * @param {<type>} <Description 1st parameter>
-   * @param {<type>} <Description 2nd parameter>
+   * Send record data to api
+   * @param {Object} JSON record data
+   * @param {String} CorrelationId identifier for bulk item
+   * @param {String} Content type for handling conversion
    * @returns <Description return value>
    */
   function sendRecordToBulk(record, correlationId, contentType) {
@@ -121,9 +122,15 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   /**
-   * <Description>
-   * @param {<type>} <Description 1st parameter>
-   * @param {<type>} <Description 2nd parameter>
+   * Query bulk queue items
+   * @param {Object} {
+   * correlationId or id: {String} CorrelationId identifier for bulk item
+   * queueItemState: {String} Status (@natlibfi/melinda-rest-api-commons/constants/QUEUE_ITEM_STATE),
+   * creationTime: {[String]} Specific date  ["YYYY-MM-DD"] or date between ["YYYY-MM-DD", "YYYY-MM-DD"] [date before, date after],
+   * modificationTime: {[String]} Specific date ["YYYY-MM-DD"] or date between ["YYYY-MM-DD", "YYYY-MM-DD"], [date before, date after],
+   * skip: {Integer} Skip n log items,
+   * limit: {Integer} Limit results to n log items
+   * }
    * @returns <Description return value>
    */
   function readBulk(params) {
@@ -132,9 +139,8 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   /**
-   * <Description>
-   * @param {<type>} <Description 1st parameter>
-   * @param {<type>} <Description 2nd parameter>
+   * Get just bulk queue item status
+   * @param {String} CorrelationId identifier for bulk item
    * @returns <Description return value>
    */
   function getBulkState(correlationId) {
