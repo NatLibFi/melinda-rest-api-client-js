@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
 	},
 	"license": "MIT",
-	"version": "4.1.0-alpha.1",
+	"version": "5.0.0-alpha.1",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -88,18 +88,18 @@
 			}
 		}
 	},
-  "mocha": {
-    "spec": [
-      "src/*.spec.js"
-    ],
-    "require": [
-      "@babel/register"
-    ],
-    "inline-diffs": true,
-    "maxDiffSize": 25000,
-    "bail": true,
-    "exit": true
-  },
+	"mocha": {
+		"spec": [
+			"src/*.spec.js"
+		],
+		"require": [
+			"@babel/register"
+		],
+		"inline-diffs": true,
+		"maxDiffSize": 25000,
+		"bail": true,
+		"exit": true
+	},
 	"nyc": {
 		"exclude": [
 			"*/*.spec.js"
