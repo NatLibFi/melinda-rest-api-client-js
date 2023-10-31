@@ -4,6 +4,7 @@ import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
 import createDebugLogger from 'debug';
 import {checkStatus} from './errorResponseHandler';
+import {removesUndefinedObjectValues} from './utils';
 
 export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:log-client');
@@ -23,64 +24,64 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get specific log item
-   * @param {Object} {
-   * correlationId OR id: {String} identifier for log,
-   * logItemType: {String} LOG_ITEM_TYPE constant,
-   * blobSequence: {Integer} sequence for log in correlation,
-   * standardIdentifiers: {String} ISBN etc.,
-   * databaseId: {String} Melinda-ID,
-   * sourceIds: SID,
-   * skip: {Integer} skip n log items,
-   * limit: {Integer} Limit results to n log items
-   * }
+   * @param {String} correlationId OR id: {String} identifier for log
+   * @param {String} logItemType LOG_ITEM_TYPE constant
+   * @param {Integer} blobSequence for log in correlation
+   * @param {String} standardIdentifiers ISBN etc.
+   * @param {String} databaseId Melinda-ID
+   * @param {} sourceIds SID
+   * @param {Integer} skip n log items
+   * @param {Integer} limit results to n log items
    * @returns List of logs based on search params
    */
-  function getLog(params) {
+  function getLog({correlationId, logItemType, blobSequence, standardIdentifiers, databaseId, sourceIds, skip = 0, limit}) {
+    const params = removesUndefinedObjectValues({correlationId, logItemType, blobSequence, standardIdentifiers, databaseId, sourceIds, skip, limit});
     return doRequest({method: 'get', path: 'logs', params});
   }
 
   /**
    * Sets protect flag to logs
    * @param {String} CorrelationId identifier for log
-   * @param {Object} {
-   * blobSequence: {Integer} Sequence numer for record log
-   * }
+   * @param {Integer} blobSequence Sequence numer for record log
    * @returns {status, payload}
    */
-  function protectLog(correlationId, params) {
+  function protectLog(correlationId, {blobSequence}) {
+    const params = removesUndefinedObjectValues({blobSequence});
     return doRequest({method: 'put', path: `logs/${correlationId}`, params});
   }
 
   /**
    * Removes log
    * @param {String} CorrelationId identifier for log
-   * @param {Object} {
-   * force: {Integer} 0|1 Boolean for removal done by force
-   * }
+   * @param {Integer} force 0|1 Boolean for removal done by force. Defaults 0
    * @returns {status, payload}
    */
-  function removeLog(correlationId, params) {
-    return doRequest({method: 'delete', path: `logs/${correlationId}`, params});
+  function removeLog(correlationId, {force = 0}) {
+    return doRequest({method: 'delete', path: `logs/${correlationId}`, params: {force}});
   }
 
   /**
    * Get list of logs based on search params
-   * @param {Object} {
-   * logItemTypes: {String} logItemTypes has comma-separated list of logItemTypes
-   * catalogers: {String} catalogers has comma-separated list of catalogers (1-10 word characters each)
-   * dateBefore: {String} 'YYYY-MM-DD',
-   * dateAfter:  {String} 'YYYY-MM-DD'}
+   * @param {String|undefined} [logItemTypes] - has comma-separated list of logItemTypes. Defaults undefined
+   * @param {String|undefined} [catalogers] - has comma-separated list of catalogers (1-10 word characters each). Defaults undefined
+   * @param {String|undefined} [dateBefore] - 'YYYY-MM-DD'. Defaults undefined
+   * @param {String|undefined} [dateAfter] - 'YYYY-MM-DD'. Defaults undefined
    * @returns List matched of logs
    */
-  function getLogsList(params) {
+  function getLogsList({logItemTypes, catalogers, dateBefore, dateAfter}) {
+    const params = removesUndefinedObjectValues({logItemTypes, catalogers, dateBefore, dateAfter});
+
     return doRequest({method: 'get', path: 'logs/list', params});
   }
 
   /**
-   * <Description>
-   * @param {<type>} <Description 1st parameter>
-   * @param {<type>} <Description 2nd parameter>
-   * @returns <Description return value>
+   * Base function to do requests to api
+   * @param {String} method Request method
+   * @param {String} path Request URL path
+   * @param {String} contentType request body content type. Defaults 'application/json'
+   * @param {Object} params URL query params to be url encoded. Defaults false
+   * @param {String} body String data. Defaults null
+   * @returns response Json
    */
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
