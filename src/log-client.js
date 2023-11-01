@@ -24,14 +24,15 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get specific log item
-   * @param {String} correlationId OR id: {String} identifier for log
-   * @param {String} logItemType LOG_ITEM_TYPE constant
-   * @param {Integer} blobSequence for log in correlation
-   * @param {String} standardIdentifiers ISBN etc.
-   * @param {String} databaseId Melinda-ID
-   * @param {} sourceIds SID
-   * @param {Integer} skip n log items
-   * @param {Integer} limit results to n log items
+   * @param {{correlationId?: string; logItemType?: string; blobSequence?: number; standardIdentifiers?: string; databaseId?: string; sourceIds?: string; skip?: number; limit?: number;}} params
+   * @param {string} [params.correlationId] - identifier for log
+   * @param {string} [params.logItemType] - LOG_ITEM_TYPE constant
+   * @param {number} [params.blobSequence] - Blob sequence for log in correlation
+   * @param {string} [params.standardIdentifiers] - ISBN etc.
+   * @param {string} [params.databaseId] - Melinda-ID
+   * @param {} [params.sourceIds] - SID
+   * @param {number} [params.skip] - Skip n log items
+   * @param {number} [params.limit] - Limit results to n log items
    * @returns List of logs based on search params
    */
   function getLog({correlationId, logItemType, blobSequence, standardIdentifiers, databaseId, sourceIds, skip = 0, limit}) {
@@ -41,8 +42,9 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Sets protect flag to logs
-   * @param {String} CorrelationId identifier for log
-   * @param {Integer} blobSequence Sequence numer for record log
+   * @param {string} correlationId identifier for log
+   * @param {{blobSequence?: number;}} params
+   * @param {number} [params.blobSequence] - Sequence numer for record log
    * @returns {status, payload}
    */
   function protectLog(correlationId, {blobSequence}) {
@@ -52,8 +54,9 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Removes log
-   * @param {String} CorrelationId identifier for log
-   * @param {Integer} force 0|1 Boolean for removal done by force. Defaults 0
+   * @param {string} CorrelationId identifier for log
+   * @param {{force?: number;}} params
+   * @param {number} params.force - 0|1 Boolean for removal done by force. Defaults 0
    * @returns {status, payload}
    */
   function removeLog(correlationId, {force = 0}) {
@@ -62,10 +65,11 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get list of logs based on search params
-   * @param {String|undefined} [logItemTypes] - has comma-separated list of logItemTypes. Defaults undefined
-   * @param {String|undefined} [catalogers] - has comma-separated list of catalogers (1-10 word characters each). Defaults undefined
-   * @param {String|undefined} [dateBefore] - 'YYYY-MM-DD'. Defaults undefined
-   * @param {String|undefined} [dateAfter] - 'YYYY-MM-DD'. Defaults undefined
+   * @param {{logItemTypes?: string; catalogers?: string; dateBefore?: string; dateAfter?: string;}} params
+   * @param {string} [params.logItemTypes] - has comma-separated list of logItemTypes. Defaults undefined
+   * @param {string} [params.catalogers] - has comma-separated list of catalogers (1-10 word characters each). Defaults undefined
+   * @param {string} [params.dateBefore] - 'YYYY-MM-DD'. Defaults undefined
+   * @param {string} [params.dateAfter] - 'YYYY-MM-DD'. Defaults undefined
    * @returns List matched of logs
    */
   function getLogsList({logItemTypes, catalogers, dateBefore, dateAfter}) {
@@ -76,11 +80,12 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Base function to do requests to api
-   * @param {String} method Request method
-   * @param {String} path Request URL path
-   * @param {String} contentType request body content type. Defaults 'application/json'
-   * @param {Object} params URL query params to be url encoded. Defaults false
-   * @param {String} body String data. Defaults null
+   * @param {{method: string; path: string; contentType?: string; params?: object; body?: string;}} params
+   * @param {string} params.method Request method
+   * @param {string} params.path Request URL path
+   * @param {string} [params.contentType] request body content type. Defaults 'application/json'
+   * @param {Object} [params.params] URL query params to be url encoded. Defaults false
+   * @param {string} [params.body] String data. Defaults null
    * @returns response Json
    */
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
