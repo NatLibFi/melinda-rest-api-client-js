@@ -65,15 +65,16 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get list of logs based on search params
-   * @param {{logItemTypes?: string; catalogers?: string; dateBefore?: string; dateAfter?: string;}} params
+   * @param {{expanded?: boolean; logItemTypes?: string; catalogers?: string; dateBefore?: string; dateAfter?: string;}} params
+   * @param {boolean} [params.expanded] - Get list of log items in expanded schema. Defaults undefined
    * @param {string} [params.logItemTypes] - has comma-separated list of logItemTypes. Defaults undefined
    * @param {string} [params.catalogers] - has comma-separated list of catalogers (1-10 word characters each). Defaults undefined
    * @param {string} [params.dateBefore] - 'YYYY-MM-DD'. Defaults undefined
    * @param {string} [params.dateAfter] - 'YYYY-MM-DD'. Defaults undefined
    * @returns List matched of logs
    */
-  function getLogsList({logItemTypes, catalogers, dateBefore, dateAfter}) {
-    const params = removesUndefinedObjectValues({logItemTypes, catalogers, dateBefore, dateAfter});
+  function getLogsList({expanded, logItemTypes, catalogers, dateBefore, dateAfter}) {
+    const params = removesUndefinedObjectValues({expanded, logItemTypes, catalogers, dateBefore, dateAfter});
 
     return doRequest({method: 'get', path: 'logs/list', params});
   }
