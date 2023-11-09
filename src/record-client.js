@@ -74,15 +74,30 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Upload single file Bulk operation
-   * @param {stream} File data stream
-   * @param {string} Content type for handling conversion stream
-   * @param {{pCatalogerIn?: string;}} params
-   * @param {string} [params.pCatalogerIn] Cataloger identifier for CAT field
+   * @param {stream} stream File data stream
+   * @param {string} streamContentType content type for records
+   * @param {{
+   * pOldNew: string; pActiveLibrary: string; pCatalogerIn?: string; pRejectFile?: string; pLogFile?: string;
+   * noop?: number; unique?: number; merge?: number; validate?: number; failOnError?: number; skipNoChangeUpdates?: number;
+   * }} queryParams
+   * @param {string} queryParams.pOldNew 'NEW'|'OLD', (NEW = CREATE, OLD = UPDATE)
+   * @param {string} queryParams.pActiveLibrary Aleph library this bulk is ment to go
+   * @param {string} [queryParams.pCatalogerIn] Cataloger identifier for CAT field
+   * @param {string} [queryParams.pRejectFile] Reject file name to be used in server for p_manage_18
+   * @param {string} [queryParams.pLogFile] Log file name to be used in server for p_manage_18
+   * @param {number} [queryParams.noop] 0|1 No operation (operate but don't save, AKA dry run)
+   * @param {number} [queryParams.unique] 0|1 Handle only if new record
+   * @param {number} [queryParams.merge] 0|1 if not new record, try to merge with existing
+   * @param {number} [queryParams.validate] 0|1
+   * @param {number} [queryParams.failOnError] 0|1
+   * @param {number} [queryParams.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
    * @returns <Description return value>
    */
-  function createBulk(stream, streamContentType, {pCatalogerIn}) {
+  function createBulk(stream, streamContentType, {queryParams}) {
     debug('POST bulk stream');
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, pCatalogerIn}, contentType: streamContentType, body: stream});
+    const params = removesUndefinedObjectValues(queryParams);
+
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, params}, contentType: streamContentType, body: stream});
   }
 
   /**
@@ -91,18 +106,18 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {{
    * pOldNew: string; pActiveLibrary: string; pCatalogerIn?: string; pRejectFile?: string; pLogFile?: string;
    * noop?: number; unique?: number; merge?: number; validate?: number; failOnError?: number; skipNoChangeUpdates?: number;
-   * }} params
-   * @param {string} params.pOldNew 'NEW'|'OLD', (NEW = CREATE, OLD = UPDATE)
-   * @param {string} params.pActiveLibrary Aleph library this bulk is ment to go
-   * @param {string} [params.pCatalogerIn] Cataloger identifier for CAT field,
-   * @param {string} [params.pRejectFile] Reject file name to be used in server for p_manage_18
-   * @param {string} [params.pLogFile] Log file name to be used in server for p_manage_18
-   * @param {number} [params.noop] 0|1 No operation (operate but don't save, AKA dry run)
-   * @param {number} [params.unique] 0|1 Handle only if new record
-   * @param {number} [params.merge] 0|1 if not new record, try to merge with existing
-   * @param {number} [params.validate] 0|1
-   * @param {number} [params.failOnError] 0|1
-   * @param {number} [params.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
+   * }} queryParams
+   * @param {string} queryParams.pOldNew 'NEW'|'OLD', (NEW = CREATE, OLD = UPDATE)
+   * @param {string} queryParams.pActiveLibrary Aleph library this bulk is ment to go
+   * @param {string} [queryParams.pCatalogerIn] Cataloger identifier for CAT field,
+   * @param {string} [queryParams.pRejectFile] Reject file name to be used in server for p_manage_18
+   * @param {string} [queryParams.pLogFile] Log file name to be used in server for p_manage_18
+   * @param {number} [queryParams.noop] 0|1 No operation (operate but don't save, AKA dry run)
+   * @param {number} [queryParams.unique] 0|1 Handle only if new record
+   * @param {number} [queryParams.merge] 0|1 if not new record, try to merge with existing
+   * @param {number} [queryParams.validate] 0|1
+   * @param {number} [queryParams.failOnError] 0|1
+   * @param {number} [queryParams.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
    * @returns <Description return value>
    */
   function creteBulkNoStream(contentType, queryParams) {
