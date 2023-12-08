@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
 	},
 	"license": "MIT",
-	"version": "4.0.3",
+	"version": "5.0.0-alpha.3",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -26,19 +26,19 @@
 		"prepare": "npm run build",
 		"lint": "eslint src",
 		"lint:dev": "eslint --fix src",
-		"test": "npm run lint && npm run test:base -- src/*.spec.js",
-		"test:base": "cross-env NODE_ENV=test nyc mocha --require @babel/register",
-		"test:dev": "npm run lint:dev && npm run test:base -- src/*.spec.js src/**/**/*.spec.js && npm run coverage",
+		"test": "npm run lint && npm run test:base ",
+		"test:base": "cross-env NODE_ENV=test nyc mocha",
+		"test:dev": "npm run lint:dev && npm run test:base && npm run coverage",
 		"coverage": "nyc check-coverage --per-file",
 		"build": "babel src --source-maps --copy-files --delete-dir-on-start --out-dir=dist",
-		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
+		"watch:test": "cross-env DEBUG=@natlibfi/melinda-rest-api-client* NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "7.2.2",
 		"@natlibfi/melinda-backend-commons": "^2.2.1",
 		"@natlibfi/melinda-commons": "^13.0.6",
 		"debug": "^4.3.4",
-		"http-status": "^1.6.2",
+		"http-status": "^1.7.0",
 		"node-fetch": "^2.7.0"
 	},
 	"devDependencies": {
@@ -49,7 +49,7 @@
 		"@babel/plugin-transform-runtime": "^7.22.10",
 		"@babel/preset-env": "^7.22.14",
 		"@babel/register": "^7.22.5",
-		"@natlibfi/eslint-config-melinda-backend": "^3.0.1",
+		"@natlibfi/eslint-config-melinda-backend": "^3.0.3",
 		"@natlibfi/fixugen-http-client": "^3.0.0",
 		"@natlibfi/fixura": "^3.0.1",
 		"babel-plugin-istanbul": "^6.1.1",
@@ -88,13 +88,24 @@
 			}
 		}
 	},
+	"mocha": {
+		"spec": [
+			"src/*.spec.js"
+		],
+		"require": [
+			"@babel/register"
+		],
+		"inline-diffs": true,
+		"maxDiffSize": 25000,
+		"bail": true,
+		"exit": true
+	},
 	"nyc": {
 		"exclude": [
 			"*/*.spec.js"
 		],
 		"reporter": [
-			"lcov",
-			"html"
+			"text"
 		],
 		"require": [
 			"@babel/register"

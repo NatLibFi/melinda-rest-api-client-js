@@ -9,7 +9,7 @@
     },
     {
       "method": "get",
-      "url": "/bulk/?id=0-0-0",
+      "url": "/bulk/?correlationId=0-0-0&skip=0",
       "status": 200
     }
   ]

@@ -23,7 +23,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
 
       if (finalBulkStates.includes(bulkData.queueItemState)) {
         debug(`Bulk final state ${bulkData.queueItemState}`);
-        const [bulkMetadata] = await melindaApiClient.readBulk({id: correlationId});
+        const [bulkMetadata] = await melindaApiClient.readBulk({correlationId});
         return bulkMetadata;
       }
 
@@ -37,7 +37,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
       }
 
       if (breakLoopOnStateChange && modificationTime !== bulkData.modificationTime) {
-        const [bulkMetadata] = await melindaApiClient.readBulk({id: correlationId});
+        const [bulkMetadata] = await melindaApiClient.readBulk({correlationId});
         return bulkMetadata;
       }
 
