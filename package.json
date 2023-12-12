@@ -34,8 +34,8 @@
 		"watch:test": "cross-env DEBUG=@natlibfi/melinda-rest-api-client* NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "8.0.0",
-		"@natlibfi/melinda-backend-commons": "^2.2.3",
+		"@natlibfi/marc-record": "^8.0.2",
+		"@natlibfi/melinda-backend-commons": "^2.2.4",
 		"@natlibfi/melinda-commons": "^13.0.9",
 		"debug": "^4.3.4",
 		"http-status": "^1.7.3",
