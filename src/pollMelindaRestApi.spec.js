@@ -27,7 +27,6 @@ async function callback({getFixture, correlationId}) {
   const expectedResponse = getFixture('output.json');
   const poller = pollMelindaRestApi(melindaApiClient, correlationId, false, 10);
   const response = await poller();
-  console.log(response); // eslint-disable-line
   debug(response);
   expect(response).to.eql(expectedResponse);
 }
