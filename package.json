@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
 	},
 	"license": "MIT",
-	"version": "5.0.0",
+	"version": "5.0.1-alpha.1",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -102,11 +102,11 @@
 		"exit": true
 	},
 	"nodemonConfig": {
-	  "exec": "npm run test:dev",
-	  "watch": [
-		"src/*",
-		"test-fixtures/*"
-	  ]
+		"exec": "npm run test:dev",
+		"watch": [
+			"src/*",
+			"test-fixtures/*"
+		]
 	},
 	"nyc": {
 		"exclude": [
