@@ -51,8 +51,8 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {number} [noop] 0|1 No operation (operate but don't save, AKA dry run)
    * @param {number} [unique] 0|1 Handle only if new record
    * @param {number} [merge] 0|1 if not new record, try to merge with existing
-   * @param {string} [cataloger] Cataloger identifier for CAT field
-   * @returns <Description return value>
+   * @param {string} [cataloger=undefined] Cataloger identifier for CAT field
+   * @returns {object} Response JSON
    */
   function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined}) {
     debug('POST create prio');
@@ -61,12 +61,12 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send update to record in Melinda
-   * @param {MarcRecord} Record data in Json format
-   * @param {string} Record Melinda-ID
+   * @param {MarcRecord} record data in Json format
+   * @param {string} recordId Melinda-ID
    * @param {{noop?: number; cataloger?: string}} params
    * @param {number} [params.noop=0] 0|1 No operation (operate but don't save, AKA dry run)
-   * @param {string} [params.cataloger] Cataloger identifier for CAT field
-   * @returns <Description return value>
+   * @param {string} [params.cataloger=undefined] Cataloger identifier for CAT field
+   * @returns {object} Response JSON
    */
   function update(record, recordId, {noop = 0, cataloger = undefined}) {
     debug(`POST update prio ${recordId}`);
