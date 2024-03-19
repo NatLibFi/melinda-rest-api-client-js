@@ -47,15 +47,16 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   /**
    * Send new record to be saved in Melinda
    * @param {MarcRecord} Record data in Json format
-   * @param {{noop?: number; unique?: number; merge?: number;}} params
+   * @param {{noop?: number; unique?: number; merge?: number; cataloger?: string}} params
    * @param {number} [noop] 0|1 No operation (operate but don't save, AKA dry run)
    * @param {number} [unique] 0|1 Handle only if new record
    * @param {number} [merge] 0|1 if not new record, try to merge with existing
+   * @param {string} [cataloger] Cataloger identifier for CAT field
    * @returns <Description return value>
    */
-  function create(record, {noop = 0, unique = 0, merge = 0}) {
+  function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined}) {
     debug('POST create prio');
-    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge, cataloger}, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
