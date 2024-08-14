@@ -98,7 +98,6 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     debug('POST bulk stream');
     debug(`queryParams: ${JSON.stringify(queryParams)}`);
     const params = removesUndefinedObjectValues(queryParams);
-    debug(`params: ${JSON.stringify(params)}`);
 
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
