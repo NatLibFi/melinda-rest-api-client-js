@@ -244,7 +244,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
         return data;
       }
 
-      if (response.status === httpStatus.ACCEPTED) {
+      if (response.status === httpStatus.ACCEPTED || response.status === httpStatus.CREATED) {
         debug('Handling bulk response ACCEPTED');
         return response.json();
       }
