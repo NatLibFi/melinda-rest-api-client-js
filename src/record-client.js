@@ -94,11 +94,12 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {number} [queryParams.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
    * @returns <Description return value>
    */
-  function createBulk(stream, streamContentType, {queryParams}) {
+  function createBulk(stream, streamContentType, queryParams) {
     debug('POST bulk stream');
+    debug(`queryParams: ${JSON.stringify(queryParams)}`);
     const params = removesUndefinedObjectValues(queryParams);
 
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, params}, contentType: streamContentType, body: stream});
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
   /**
@@ -194,6 +195,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {string} [params.body] String data. Defaults null
    * @returns <Description return value>
    */
+  // eslint-disable-next-line max-statements
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
     try {
@@ -242,7 +244,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
         return data;
       }
 
-      if (response.status === httpStatus.ACCEPTED) {
+      if (response.status === httpStatus.ACCEPTED || response.status === httpStatus.CREATED) {
         debug('Handling bulk response ACCEPTED');
         return response.json();
       }
