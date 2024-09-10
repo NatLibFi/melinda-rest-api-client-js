@@ -47,25 +47,26 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   /**
    * Send new record to be saved in Melinda
    * @param {MarcRecord} Record data in Json format
-   * @param {{noop?: number; unique?: number; merge?: number;}} params
+   * @param {{noop?: number; unique?: number; merge?: number; cataloger?: string}} params
    * @param {number} [noop] 0|1 No operation (operate but don't save, AKA dry run)
    * @param {number} [unique] 0|1 Handle only if new record
    * @param {number} [merge] 0|1 if not new record, try to merge with existing
-   * @returns <Description return value>
+   * @param {string} [cataloger=undefined] Cataloger identifier for CAT field
+   * @returns {object} Response JSON
    */
-  function create(record, {noop = 0, unique = 0, merge = 0}) {
+  function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined}) {
     debug('POST create prio');
-    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge, cataloger}, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
    * Send update to record in Melinda
-   * @param {MarcRecord} Record data in Json format
-   * @param {string} Record Melinda-ID
+   * @param {MarcRecord} record data in Json format
+   * @param {string} recordId Melinda-ID
    * @param {{noop?: number; cataloger?: string}} params
    * @param {number} [params.noop=0] 0|1 No operation (operate but don't save, AKA dry run)
-   * @param {string} [params.cataloger] Cataloger identifier for CAT field
-   * @returns <Description return value>
+   * @param {string} [params.cataloger=undefined] Cataloger identifier for CAT field
+   * @returns {object} Response JSON
    */
   function update(record, recordId, {noop = 0, cataloger = undefined}) {
     debug(`POST update prio ${recordId}`);
@@ -93,11 +94,12 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {number} [queryParams.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
    * @returns <Description return value>
    */
-  function createBulk(stream, streamContentType, {queryParams}) {
+  function createBulk(stream, streamContentType, queryParams) {
     debug('POST bulk stream');
+    debug(`queryParams: ${JSON.stringify(queryParams)}`);
     const params = removesUndefinedObjectValues(queryParams);
 
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, params}, contentType: streamContentType, body: stream});
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
 
   /**
@@ -193,6 +195,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {string} [params.body] String data. Defaults null
    * @returns <Description return value>
    */
+  // eslint-disable-next-line max-statements
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
     try {
