@@ -93,7 +93,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
-      const url = new URL(`${melindaApiUrl}${path}${query === '' ? '' : '?'}${query}`);
+      const url = new URL(`${melindaApiUrl}/${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
 
