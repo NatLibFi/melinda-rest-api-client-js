@@ -10,6 +10,11 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:log-client');
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
+  if ((/.*\/$/u).test(melindaApiUrl)) {
+    debug(`WARNING: URL ${melindaApiUrl} ends in a slash - remove slash!`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Invalid URL ${melindaApiUrl}. Use URL without slash in the end`);
+  }
+
   return {
     getCatalogers, getLog, protectLog, removeLog, getLogsList
   };

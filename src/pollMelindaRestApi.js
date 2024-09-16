@@ -10,6 +10,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
 
   return pollResult;
 
+  // eslint-disable-next-line max-statements
   async function pollResult(modificationTime = null, wait = false) {
     try {
       if (wait) {
