@@ -36,7 +36,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   return {
-    read, create, update, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
+    read, create, update, restore, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
   };
 
   /**
@@ -77,6 +77,21 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     debug(`POST update prio ${recordId}`);
     return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, noop, cataloger}, body: JSON.stringify(record, undefined, '')});
   }
+
+  /**
+   * Send a request to restore a deleted record in Melinda
+   * @param {string} recordId Melinda-ID
+   * @param {{noop?: number; cataloger?: string}} params
+   * @param {number} [params.noop=0] 0|1 No operation (operate but don't save, AKA dry run)
+   * @param {string} [params.cataloger=undefined] Cataloger identifier for CAT field
+   * @returns {object} Response JSON
+   */
+  function restore(recordId, {noop = 0, cataloger = undefined}) {
+    debug(`POST restore prio ${recordId}`);
+    // restore uses /fix -path and UNDEL -fixType
+    return doRequest({method: 'post', path: `fix/${recordId}`, params: {...defaultParamsPrio, noop, cataloger, fixType: 'UNDEL'}, body: ''});
+  }
+
 
   /**
    * Upload single file Bulk operation
@@ -221,6 +236,8 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       });
 
       debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
+
+      // Check status handles: 400, 401, 403, 404 and 503
       await checkStatus(response);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
@@ -244,8 +261,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
           return {record};
         }
 
-        // Create new record
-        // Validation results & update record
+        // Create new record - this probably changes REST Apis httpStatus.201 to httpStatus.200
+        // Validation results & update record (200)
+        // Restore a deleted Melinda records (200)
         return data;
       }
 
@@ -263,7 +281,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       throw new ApiError(response.status);
     } catch (error) {
       debug('Api-client Error');
-      if (error instanceof ApiError) { // eslint-disable-line functional/no-conditional-statements
+      if (error instanceof ApiError) {
         throw error;
       }
 
