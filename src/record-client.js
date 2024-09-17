@@ -51,12 +51,13 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {number} [noop] 0|1 No operation (operate but don't save, AKA dry run)
    * @param {number} [unique] 0|1 Handle only if new record
    * @param {number} [merge] 0|1 if not new record, try to merge with existing
+   * @param {string} [skipLowValidation=0] 0|1 Do not validate user authorization for LOW changes in record
    * @param {string} [cataloger=undefined] Cataloger identifier for CAT field
    * @returns {object} Response JSON
    */
-  function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined}) {
+  function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined, skipLowValidation = 0}) {
     debug('POST create prio');
-    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge, cataloger}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge, cataloger, skipLowValidation}, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
@@ -66,11 +67,12 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {{noop?: number; cataloger?: string}} params
    * @param {number} [params.noop=0] 0|1 No operation (operate but don't save, AKA dry run)
    * @param {string} [params.cataloger=undefined] Cataloger identifier for CAT field
+   * @param {string} [params.skipLowValidation=0] 0|1 Do not validate user authorization for LOW changes in record
    * @returns {object} Response JSON
    */
-  function update(record, recordId, {noop = 0, cataloger = undefined}) {
+  function update(record, recordId, {noop = 0, cataloger = undefined, skipLowValidation = 0}) {
     debug(`POST update prio ${recordId}`);
-    return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, noop, cataloger}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, noop, cataloger, skipLowValidation}, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
