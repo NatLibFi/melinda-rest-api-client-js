@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
 	},
 	"license": "MIT",
-	"version": "5.1.0",
+	"version": "5.1.1-alpha.3",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -57,10 +57,10 @@
 		"babel-plugin-rewire": "^1.2.0",
 		"chai": "^4.5.0",
 		"cross-env": "^7.0.3",
-		"eslint": "^8.57.0",
+		"eslint": "^8.57.1",
 		"mocha": "^10.7.3",
 		"nock": "^13.5.5",
-		"nodemon": "^3.1.4",
+		"nodemon": "^3.1.5",
 		"nyc": "^17.0.0"
 	},
 	"eslintConfig": {
