@@ -7,7 +7,7 @@ import {createMelindaApiRecordClient} from './record-client';
 
 const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi:test');
 const melindaApiClient = createMelindaApiRecordClient({
-  melindaApiUrl: 'http://foo.bar/',
+  melindaApiUrl: 'http://foo.bar',
   melindaApiUsername: 'foo',
   melindaApiPassword: 'bar'
 });

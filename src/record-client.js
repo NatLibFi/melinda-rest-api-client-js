@@ -30,6 +30,11 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   const defaultParamsBulk = cataloger ? {pCatalogerIn: cataloger} : {};
   const defaultParamsPrio = cataloger ? {cataloger} : {};
 
+  if ((/.*\/$/u).test(melindaApiUrl)) {
+    debug(`WARNING: URL ${melindaApiUrl} ends in a slash - remove slash!`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Invalid URL ${melindaApiUrl}. Use URL without slash in the end`);
+  }
+
   return {
     read, create, update, restore, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
   };
@@ -217,7 +222,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
-      const url = new URL(`${melindaApiUrl}${path}${query === '' ? '' : '?'}${query}`);
+      const url = new URL(`${melindaApiUrl}/${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
 
