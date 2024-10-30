@@ -246,7 +246,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
         const data = await response.json();
         const responseAsString = JSON.stringify(data);
         // prevents massive strings
-        debug(`Response data: ${responseAsString.length <= 100 ? responseAsString : responseAsString.substring(0, 100) + '...'}`);
+        debug(`Response data: ${responseAsString.length <= 100 ? responseAsString : `${responseAsString.substring(0, 100)}...`}`);
 
         if ((/^bulk\//u).test(path)) {
           debug('Handling bulk response');
