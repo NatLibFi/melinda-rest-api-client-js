@@ -174,7 +174,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   function sendRecordToBulk(record, correlationId, contentType) {
     debug(`POST record to bulk ${correlationId}`);
     //debug(JSON.stringify(record));
-    return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record)});
+    return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
@@ -244,7 +244,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
         const data = await response.json();
-        debug(`Response data: ${JSON.stringify(data)}`);
+        const responseAsString = JSON.stringify(data);
+        // prevents massive strings
+        debug(`Response data: ${responseAsString.length <= 100 ? responseAsString : responseAsString.substring(0, 100) + '...'}`);
 
         if ((/^bulk\//u).test(path)) {
           debug('Handling bulk response');
