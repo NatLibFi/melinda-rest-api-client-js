@@ -38,7 +38,7 @@
 	"dependencies": {
 		"@natlibfi/marc-record": "^9.1.2",
 		"@natlibfi/melinda-backend-commons": "^2.3.6",
-		"@natlibfi/melinda-commons": "^13.0.18",
+		"@natlibfi/melinda-commons": "^13.0.19-alpha.3",
 		"debug": "^4.4.0",
 		"http-status": "^2.1.0",
 		"node-fetch": "^2.7.0"
