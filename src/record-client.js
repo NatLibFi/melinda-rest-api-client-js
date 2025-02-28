@@ -52,17 +52,19 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   /**
    * Send new record to be saved in Melinda
    * @param {MarcRecord} Record data in Json format
-   * @param {{noop?: number; unique?: number; merge?: number; cataloger?: string}} params
+   * @param {{noop?: number; unique?: number; merge?: number; skipLowValidation?: number; matchFailuresAsNew?: number; cataloger?: string}} params
    * @param {number} [noop] 0|1 No operation (operate but don't save, AKA dry run)
    * @param {number} [unique] 0|1 Handle only if new record
-   * @param {number} [merge] 0|1 if not new record, try to merge with existing
-   * @param {string} [skipLowValidation=0] 0|1 Do not validate user authorization for LOW changes in record
+   * @param {number} [merge] 0|1 if not new record, try to merge with existing existing record
+   * @param {number} [skipLowValidation=0] 0|1 Do not validate user authorization for LOW changes in record
+   * @param {number} [matchFailuresAsNew=undefined] 0|1 Handle cases where there are matches failed by matchValidation as new records
    * @param {string} [cataloger=undefined] Cataloger identifier for CAT field
    * @returns {object} Response JSON
    */
-  function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined, skipLowValidation = 0}) {
+  function create(record, {noop = 0, unique = 0, merge = 0, cataloger = undefined, skipLowValidation = 0, matchFailuresAsNew = undefined}) {
     debug('POST create prio');
-    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, noop, unique, merge, cataloger, skipLowValidation}, body: JSON.stringify(record, undefined, '')});
+    const params = removesUndefinedObjectValues({noop, unique, merge, cataloger, skipLowValidation, matchFailuresAsNew});
+    return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
@@ -76,8 +78,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @returns {object} Response JSON
    */
   function update(record, recordId, {noop = 0, cataloger = undefined, skipLowValidation = 0}) {
+    const params = removesUndefinedObjectValues({noop, cataloger, skipLowValidation});
     debug(`POST update prio ${recordId}`);
-    return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, noop, cataloger, skipLowValidation}, body: JSON.stringify(record, undefined, '')});
+    return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
@@ -90,8 +93,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    */
   function restore(recordId, {noop = 0, cataloger = undefined}) {
     debug(`POST restore prio ${recordId}`);
+    const params = removesUndefinedObjectValues({noop, cataloger});
     // restore uses /fix -path and UNDEL -fixType
-    return doRequest({method: 'post', path: `fix/${recordId}`, params: {...defaultParamsPrio, noop, cataloger, fixType: 'UNDEL'}, body: ''});
+    return doRequest({method: 'post', path: `fix/${recordId}`, params: {...defaultParamsPrio, ...params, fixType: 'UNDEL'}, body: ''});
   }
 
 
@@ -102,6 +106,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {{
    * pOldNew: string; pActiveLibrary: string; pCatalogerIn?: string; pRejectFile?: string; pLogFile?: string;
    * noop?: number; unique?: number; merge?: number; validate?: number; failOnError?: number; skipNoChangeUpdates?: number;
+   * matchFailuresAsNew?: number;
    * }} queryParams
    * @param {string} queryParams.pOldNew 'NEW'|'OLD', (NEW = CREATE, OLD = UPDATE)
    * @param {string} queryParams.pActiveLibrary Aleph library this bulk is ment to go
@@ -114,6 +119,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {number} [queryParams.validate] 0|1
    * @param {number} [queryParams.failOnError] 0|1
    * @param {number} [queryParams.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
+   * @param {number} [queryParams.matchFailuresAsNew] 0|1 Handle cases where there are matches failed by matchValidation as new records
    * @returns <Description return value>
    */
   function createBulk(stream, streamContentType, queryParams) {
@@ -130,6 +136,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {{
    * pOldNew: string; pActiveLibrary: string; pCatalogerIn?: string; pRejectFile?: string; pLogFile?: string;
    * noop?: number; unique?: number; merge?: number; validate?: number; failOnError?: number; skipNoChangeUpdates?: number;
+   *  matchFailuresAsNew?: number;
    * }} queryParams
    * @param {string} queryParams.pOldNew 'NEW'|'OLD', (NEW = CREATE, OLD = UPDATE)
    * @param {string} queryParams.pActiveLibrary Aleph library this bulk is ment to go
@@ -142,6 +149,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {number} [queryParams.validate] 0|1
    * @param {number} [queryParams.failOnError] 0|1
    * @param {number} [queryParams.skipNoChangeUpdates] 0|1 skip changes that won't change the database record
+   * @param {number} [queryParams.matchFailuresAsNew] 0|1 Handle cases where there are matches failed by matchValidation as new records
    * @returns <Description return value>
    */
   function creteBulkNoStream(contentType, queryParams) {
