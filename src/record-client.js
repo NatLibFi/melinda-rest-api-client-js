@@ -195,6 +195,18 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @returns <Description return value>
    */
   function sendRecordArrayToBulk(records, correlationId, contentType) {
+    if (!Array.isArray(records)) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records is not array`);
+    }
+
+    if (records.length > 100) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records array too long (max 100)`);
+    }
+
+    if (records.length === 0) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records array empty`);
+    }
+
     debug(`POST record to bulk ${correlationId}`);
     //debug(JSON.stringify(record));
     return doRequest({method: 'post', path: `bulk/records/${correlationId}`, contentType, body: JSON.stringify(records, undefined, '')});
