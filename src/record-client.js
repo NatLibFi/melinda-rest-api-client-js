@@ -36,7 +36,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   return {
-    read, create, update, restore, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, readBulk, getBulkState
+    read, create, update, restore, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, sendRecordArrayToBulk, readBulk, getBulkState
   };
 
   /**
@@ -183,6 +183,33 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     debug(`POST record to bulk ${correlationId}`);
     //debug(JSON.stringify(record));
     return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record, undefined, '')});
+  }
+
+  /**
+   * Send array of records data to api
+   * @date 10/31/2023 - 10:48:25 AM
+   *
+   * @param {[MarcRecord]} records Array of JSON record data
+   * @param {string} correlationId identifier for bulk item
+   * @param {string} contentType Content type for handling conversion
+   * @returns <Description return value>
+   */
+  function sendRecordArrayToBulk(records, correlationId, contentType) {
+    if (!Array.isArray(records)) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records is not array`);
+    }
+
+    if (records.length > 100) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records array too long (max 100)`);
+    }
+
+    if (records.length === 0) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records array empty`);
+    }
+
+    debug(`POST record to bulk ${correlationId}`);
+    //debug(JSON.stringify(record));
+    return doRequest({method: 'post', path: `bulk/records/${correlationId}`, contentType, body: JSON.stringify(records, undefined, '')});
   }
 
   /**
