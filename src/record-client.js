@@ -36,7 +36,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
   }
 
   return {
-    read, create, update, restore, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, sendRecordArrayToBulk, readBulk, getBulkState
+    read, create, update, remove, restore, createBulk, creteBulkNoStream, setBulkStatus, sendRecordToBulk, sendRecordArrayToBulk, readBulk, getBulkState
   };
 
   /**
@@ -98,6 +98,20 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     return doRequest({method: 'post', path: `fix/${recordId}`, params: {...defaultParamsPrio, ...params, fixType: 'UNDEL'}, body: ''});
   }
 
+  /**
+   * Send a request to remove a record in Melinda
+   * @param {string} recordId Melinda-ID
+   * @param {{noop?: number; cataloger?: string}} params
+   * @param {number} [params.noop=0] 0|1 No operation (operate but don't save, AKA dry run)
+   * @param {string} [params.cataloger=undefined] Cataloger identifier for CAT field
+   * @returns {object} Response JSON
+   */
+  function remove(recordId, {noop = 0, cataloger = undefined}) {
+    debug(`POST remove prio ${recordId}`);
+    const params = removesUndefinedObjectValues({noop, cataloger});
+    // remove uses /fix -path and DELET -fixType
+    return doRequest({method: 'post', path: `fix/${recordId}`, params: {...defaultParamsPrio, ...params, fixType: 'DELET'}, body: ''});
+  }
 
   /**
    * Upload single file Bulk operation
