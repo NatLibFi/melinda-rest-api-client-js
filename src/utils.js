@@ -12,7 +12,7 @@ export function removesUndefinedObjectValues(object) {
 
   const newObject = {};
   newObjectKeys.forEach(key => {
-    newObject[key] = object[key]; // eslint-disable-line functional/immutable-data
+    newObject[key] = object[key];
   });
 
   return newObject;

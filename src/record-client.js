@@ -1,11 +1,10 @@
-import fetch from 'node-fetch';
+import createDebugLogger from 'debug';
 import httpStatus from 'http-status';
 import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
-import createDebugLogger from 'debug';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {checkStatus} from './errorResponseHandler';
-import {removesUndefinedObjectValues} from './utils';
+import {checkStatus} from './errorResponseHandler.js';
+import {removesUndefinedObjectValues} from './utils.js';
 
 // Does not allow empty subfields. (Probably never true)
 MarcRecord.setValidationOptions({subfieldValues: false});

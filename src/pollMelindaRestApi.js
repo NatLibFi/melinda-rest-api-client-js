@@ -1,7 +1,7 @@
-import {Error as ApiError} from '@natlibfi/melinda-commons';
+import createDebugLogger from 'debug';
 import httpStatus from 'http-status';
 import {promisify} from 'util';
-import createDebugLogger from 'debug';
+import {Error as ApiError} from '@natlibfi/melinda-commons';
 
 export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnStateChange = false, pollTime = 3000) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi');

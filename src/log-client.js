@@ -1,10 +1,9 @@
-import fetch from 'node-fetch';
+import createDebugLogger from 'debug';
 import httpStatus from 'http-status';
 import {URL, URLSearchParams} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
-import createDebugLogger from 'debug';
-import {checkStatus} from './errorResponseHandler';
-import {removesUndefinedObjectValues} from './utils';
+import {checkStatus} from './errorResponseHandler.js';
+import {removesUndefinedObjectValues} from './utils.js';
 
 export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:log-client');
@@ -130,7 +129,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
       throw new ApiError(response.status);
     } catch (error) {
       debug('Api-client Error');
-      if (error instanceof ApiError) { // eslint-disable-line functional/no-conditional-statements
+      if (error instanceof ApiError) {
         throw error;
       }
 
