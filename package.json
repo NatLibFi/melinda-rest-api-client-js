@@ -35,15 +35,15 @@
 		"dev:debug": "cross-env LOG_LEVEL=debug DEBUG=@natlibfi/* NODE_ENV=test npm run watch:test"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.0-alpha.1",
-		"@natlibfi/melinda-backend-commons": "^3.0.0-alpha.4",
-		"@natlibfi/melinda-commons": "^14.0.0-alpha.3",
+		"@natlibfi/marc-record": "next",
+		"@natlibfi/melinda-backend-commons": "next",
+		"@natlibfi/melinda-commons": "next",
 		"debug": "^4.4.0",
 		"http-status": "^2.1.0"
 	},
 	"devDependencies": {
-		"@natlibfi/fixugen-http-client": "^4.0.0-alpha.1",
-		"@natlibfi/fixura": "^4.0.0-alpha.12",
+		"@natlibfi/fixugen-http-client": "next",
+		"@natlibfi/fixura": "next",
 		"cross-env": "^7.0.3",
 		"esbuild": "^0.25.9",
 		"eslint": "^9.33.0"
