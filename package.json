@@ -5,13 +5,12 @@
 		"name": "The National Library of Finland"
 	},
 	"keywords": [],
-	"homepage": "https://github.com/natlibfi/melinda-rest-api-client-js",
+	"homepage": "https://www.npmjs.com/package/@natlibfi/melinda-rest-api-client",
 	"bugs": {
 		"url": "https://github.com/natlibfi/melinda-rest-api-client-js/issues"
 	},
 	"repository": {
-		"type": "git",
-		"url": "git@github.com:natlibfi/melinda-rest-api-client-js.git"
+		"url": "https://github.com/NatLibFi/melinda-rest-api-client-js"
 	},
 	"license": "MIT",
 	"version": "6.0.0-alpha.2",
