@@ -265,7 +265,6 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {string} [params.body] String data. Defaults null
    * @returns <Description return value>
    */
-  // eslint-disable-next-line max-statements
   async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
     debug('Executing request');
     try {
