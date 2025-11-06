@@ -1,9 +1,9 @@
-import {expect} from 'chai';
+import assert from 'node:assert';
+import createDebugLogger from 'debug';
 import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen-http-client';
-import {pollMelindaRestApi} from './pollMelindaRestApi';
-import createDebugLogger from 'debug';
-import {createMelindaApiRecordClient} from './record-client';
+import {pollMelindaRestApi} from './pollMelindaRestApi.js';
+import {createMelindaApiRecordClient} from './record-client.js';
 
 const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi:test');
 const melindaApiClient = createMelindaApiRecordClient({
@@ -14,7 +14,7 @@ const melindaApiClient = createMelindaApiRecordClient({
 
 generateTests({
   callback,
-  path: [__dirname, '..', 'test-fixtures', 'pollMelindaRestApi'],
+  path: [import.meta.dirname, '..', 'test-fixtures', 'pollMelindaRestApi'],
   useMetadataFile: true,
   recurse: false,
   fixura: {
@@ -28,5 +28,5 @@ async function callback({getFixture, correlationId}) {
   const poller = pollMelindaRestApi(melindaApiClient, correlationId, false, 10);
   const response = await poller();
   debug(response);
-  expect(response).to.eql(expectedResponse);
+  assert.deepStrictEqual(response, expectedResponse);
 }
