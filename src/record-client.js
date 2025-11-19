@@ -142,7 +142,12 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     const params = removesUndefinedObjectValues(queryParams);
     debug(`params: ${JSON.stringify(params)}`);
 
-    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
+    // duplex:
+    // "Controls duplex behavior of the request. If this is present it must have the value 'half', meaning that the browser must send the entire request before processing the response.
+    // This option must be present when body is a ReadableStream."
+    // see https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#duplex
+
+    return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream, duplex: 'half'});
   }
 
   /**
@@ -265,9 +270,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    * @param {string} [params.contentType] request body content type. Defaults 'application/json'
    * @param {object} [params.params] URL query params to be url encoded. Defaults false
    * @param {string} [params.body] String data. Defaults null
+   * @param {string} [params.duplex] String data. Defaults undefined. Must be 'half' if body is a readable stream.
    * @returns <Description return value>
    */
-  async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
+  async function doRequest({method, path, contentType = 'application/json', params = false, body = null, duplex = undefined}) {
     debug('Executing request');
     try {
       const query = params ? new URLSearchParams(params) : '';
@@ -290,9 +296,11 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       const response = await fetch(url, {
         method,
         headers,
-        body
+        body,
+        duplex
       });
 
+      debug(`We got response: ${response.status}`);
       debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
 
       // Check status handles: 400, 401, 403, 404 and 503
@@ -344,7 +352,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       if (error instanceof ApiError) {
         throw error;
       }
-
+      debug(error);
       debug(JSON.stringify(error));
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Unexpected internal error');
     }
