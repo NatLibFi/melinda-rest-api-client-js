@@ -22,6 +22,7 @@ MarcRecord.setValidationOptions({subfieldValues: false});
  * @param {string} [params.userAgent='Melinda commons API client / Javascript']
  * @returns {JSON} Functions to handle record data
  */
+// eslint-disable-next-line max-lines-per-function
 export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, cataloger = false, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:api-client');
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
@@ -139,6 +140,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
     debug('POST bulk stream');
     debug(`queryParams: ${JSON.stringify(queryParams)}`);
     const params = removesUndefinedObjectValues(queryParams);
+    debug(`params: ${JSON.stringify(params)}`);
 
     return doRequest({method: 'post', path: 'bulk/', params: {...defaultParamsBulk, ...params}, contentType: streamContentType, body: stream});
   }
@@ -272,15 +274,22 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       const url = new URL(`${melindaApiUrl}/${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
+      debug(`Ferching next`);
 
-      const response = await fetch(url, {
-        method,
-        headers: {
+      const headers = {
           'User-Agent': userAgent,
           'content-type': contentType,
           Authorization,
           Accept: 'application/json'
-        },
+      };
+
+      debug(`headers: ${JSON.stringify(headers)}`);
+      debug(`method: ${JSON.stringify(method)}`);
+      debug(`body: ${JSON.stringify(body)}`);
+
+      const response = await fetch(url, {
+        method,
+        headers,
         body
       });
 
