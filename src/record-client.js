@@ -25,6 +25,8 @@ MarcRecord.setValidationOptions({subfieldValues: false});
 // eslint-disable-next-line max-lines-per-function
 export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, cataloger = false, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:api-client');
+  const debugData = debug.extend('data');
+  const debugDev = debug.extend('dev');
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
   const defaultParamsBulk = cataloger ? {pCatalogerIn: cataloger} : {};
@@ -138,9 +140,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    */
   function createBulk(stream, streamContentType, queryParams) {
     debug('POST bulk stream');
-    debug(`queryParams: ${JSON.stringify(queryParams)}`);
+    debugDev(`queryParams: ${JSON.stringify(queryParams)}`);
     const params = removesUndefinedObjectValues(queryParams);
-    debug(`params: ${JSON.stringify(params)}`);
+    debugDev(`params: ${JSON.stringify(params)}`);
 
     // duplex:
     // "Controls duplex behavior of the request. If this is present it must have the value 'half', meaning that the browser must send the entire request before processing the response.
@@ -280,7 +282,6 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       const url = new URL(`${melindaApiUrl}/${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
-      debug(`Ferching next`);
 
       const headers = {
           'User-Agent': userAgent,
@@ -289,9 +290,9 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
           Accept: 'application/json'
       };
 
-      debug(`headers: ${JSON.stringify(headers)}`);
-      debug(`method: ${JSON.stringify(method)}`);
-      debug(`body: ${JSON.stringify(body)}`);
+      debugDev(`headers: ${JSON.stringify(headers)}`);
+      debugDev(`method: ${JSON.stringify(method)}`);
+      debugData(`body: ${JSON.stringify(body)}`);
 
       const response = await fetch(url, {
         method,
@@ -300,7 +301,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
         duplex
       });
 
-      debug(`We got response: ${response.status}`);
+      debugDev(`We got response: ${response.status}`);
       debug(`${(/^bulk\//u).test(path) ? 'Bulk' : 'Prio'}, ${method}, status: ${response.status}`);
 
       // Check status handles: 400, 401, 403, 404 and 503
@@ -320,7 +321,7 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
             return value;
           }
 
-          // Querry bulk status
+          // Query bulk status
           return data;
         }
 
