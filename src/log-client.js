@@ -5,6 +5,7 @@ import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-
 import {checkStatus} from './errorResponseHandler.js';
 import {removesUndefinedObjectValues} from './utils.js';
 
+// eslint-disable-next-line max-lines-per-function
 export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, userAgent = 'Melinda commons API client / Javascript'}) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:log-client');
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
