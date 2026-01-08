@@ -2,6 +2,6 @@
 
 ## License and copyright
 
-Copyright (c) 2020-2025 **University Of Helsinki (The National Library Of Finland)**
+Copyright (c) 2020-2026 **University Of Helsinki (The National Library Of Finland)**
 
 This project's source code is licensed under the terms of **MIT** or any later version.
