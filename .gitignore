@@ -4,3 +4,8 @@ coverage
 dist
 .nyc_output
 configCrowd.js
+
+# AI agent files
+.pi/
+AGENTS.md
+CONTEXT.md
