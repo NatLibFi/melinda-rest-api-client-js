@@ -1,6 +1,5 @@
 import httpStatus from 'http-status';
-import {createLogger} from '@natlibfi/melinda-backend-commons';
-import {Error as ApiError} from '@natlibfi/melinda-commons';
+import {Error as ApiError, createLogger} from '@natlibfi/melinda-commons';
 
 const logger = createLogger();
 
