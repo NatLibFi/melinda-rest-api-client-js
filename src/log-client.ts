@@ -1,12 +1,46 @@
 import createDebugLogger from 'debug';
 import httpStatus from 'http-status';
-import {URL, URLSearchParams} from 'url';
+import {URL} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
-import {checkStatus} from './errorResponseHandler.js';
-import {removesUndefinedObjectValues} from './utils.js';
+import {checkStatus} from './errorResponseHandler.ts';
+import {removesUndefinedObjectValues, toQueryString, type RequestParamValue} from './utils.ts';
+
+export interface LogClientOptions {
+  melindaApiUrl: string;
+  melindaApiUsername: string;
+  melindaApiPassword: string;
+  userAgent?: string;
+}
+
+export interface GetLogParams {
+  correlationId?: string;
+  logItemType?: string;
+  blobSequence?: number;
+  standardIdentifiers?: string;
+  databaseId?: string;
+  sourceIds?: string;
+  skip?: number;
+  limit?: number;
+};
+
+export interface GetLogsListParams {
+  expanded?: boolean;
+  logItemTypes?: string;
+  catalogers?: string;
+  dateBefore?: string;
+  dateAfter?: string;
+};
+
+interface DoRequestOptions {
+  method: string;
+  path: string;
+  contentType?: string;
+  params?: Record<string, RequestParamValue | undefined>;
+  body?: string | null;
+}
 
 // eslint-disable-next-line max-lines-per-function
-export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, userAgent = 'Melinda commons API client / Javascript'}) {
+export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, melindaApiPassword, userAgent = 'Melinda commons API client / Javascript'}: LogClientOptions) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:log-client');
   const Authorization = generateAuthorizationHeader(melindaApiUsername, melindaApiPassword);
 
@@ -21,7 +55,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get catalogers who has made logs
-   * @returns List on catalogers based on search params
+   * @returns List of catalogers based on search params
    */
   function getCatalogers() {
     return doRequest({method: 'get', path: 'logs/catalogers'});
@@ -29,56 +63,41 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get specific log item
-   * @param {{correlationId?: string; logItemType?: string; blobSequence?: number; standardIdentifiers?: string; databaseId?: string; sourceIds?: string; skip?: number; limit?: number;}} params
-   * @param {string} [params.correlationId] - identifier for log
-   * @param {string} [params.logItemType] - LOG_ITEM_TYPE constant
-   * @param {number} [params.blobSequence] - Blob sequence for log in correlation
-   * @param {string} [params.standardIdentifiers] - ISBN etc.
-   * @param {string} [params.databaseId] - Melinda-ID
-   * @param {} [params.sourceIds] - SID
-   * @param {number} [params.skip] - Skip n log items
-   * @param {number} [params.limit] - Limit results to n log items
+   * @param params Log search params
    * @returns List of logs based on search params
    */
-  function getLog({correlationId, logItemType, blobSequence, standardIdentifiers, databaseId, sourceIds, skip = 0, limit}) {
+  function getLog({correlationId, logItemType, blobSequence, standardIdentifiers, databaseId, sourceIds, skip = 0, limit}: GetLogParams) {
     const params = removesUndefinedObjectValues({correlationId, logItemType, blobSequence, standardIdentifiers, databaseId, sourceIds, skip, limit});
     return doRequest({method: 'get', path: 'logs', params});
   }
 
   /**
    * Sets protect flag to logs
-   * @param {string} correlationId identifier for log
-   * @param {{blobSequence?: number;}} params
-   * @param {number} [params.blobSequence] - Sequence numer for record log
+   * @param correlationId identifier for log
+   * @param params Protect options
    * @returns {status, payload}
    */
-  function protectLog(correlationId, {blobSequence}) {
+  function protectLog(correlationId: string, {blobSequence}: {blobSequence?: number}) {
     const params = removesUndefinedObjectValues({blobSequence});
     return doRequest({method: 'put', path: `logs/${correlationId}`, params});
   }
 
   /**
    * Removes log
-   * @param {string} CorrelationId identifier for log
-   * @param {{force?: number;}} params
-   * @param {number} params.force - 0|1 Boolean for removal done by force. Defaults 0
+   * @param correlationId identifier for log
+   * @param params Remove options
    * @returns {status, payload}
    */
-  function removeLog(correlationId, {force = 0}) {
+  function removeLog(correlationId: string, {force = 0}: {force?: number}) {
     return doRequest({method: 'delete', path: `logs/${correlationId}`, params: {force}});
   }
 
   /**
    * Get list of logs based on search params
-   * @param {{expanded?: boolean; logItemTypes?: string; catalogers?: string; dateBefore?: string; dateAfter?: string;}} params
-   * @param {boolean} [params.expanded] - Get list of log items in expanded schema. Defaults undefined
-   * @param {string} [params.logItemTypes] - has comma-separated list of logItemTypes. Defaults undefined
-   * @param {string} [params.catalogers] - has comma-separated list of catalogers (1-10 word characters each). Defaults undefined
-   * @param {string} [params.dateBefore] - 'YYYY-MM-DD'. Defaults undefined
-   * @param {string} [params.dateAfter] - 'YYYY-MM-DD'. Defaults undefined
+   * @param params Log list search params
    * @returns List matched of logs
    */
-  function getLogsList({expanded, logItemTypes, catalogers, dateBefore, dateAfter}) {
+  function getLogsList({expanded, logItemTypes, catalogers, dateBefore, dateAfter}: GetLogsListParams) {
     const params = removesUndefinedObjectValues({expanded, logItemTypes, catalogers, dateBefore, dateAfter});
 
     return doRequest({method: 'get', path: 'logs/list', params});
@@ -86,18 +105,13 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Base function to do requests to api
-   * @param {{method: string; path: string; contentType?: string; params?: object; body?: string;}} params
-   * @param {string} params.method Request method
-   * @param {string} params.path Request URL path
-   * @param {string} [params.contentType] request body content type. Defaults 'application/json'
-   * @param {Object} [params.params] URL query params to be url encoded. Defaults false
-   * @param {string} [params.body] String data. Defaults null
+   * @param options Request options
    * @returns response Json
    */
-  async function doRequest({method, path, contentType = 'application/json', params = false, body = null}) {
+  async function doRequest({method, path, contentType = 'application/json', params = {}, body = null}: DoRequestOptions): Promise<unknown> {
     debug('Executing request');
     try {
-      const query = params ? new URLSearchParams(params) : '';
+      const query = toQueryString(params);
       const url = new URL(`${melindaApiUrl}/${path}${query === '' ? '' : '?'}${query}`);
 
       debug(`connection URL ${url.toString()}`);
@@ -127,7 +141,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
       debug('Invalid response');
       debug(JSON.stringify(response));
-      throw new ApiError(response.status);
+      throw new ApiError(response.status, undefined);
     } catch (error) {
       debug('Api-client Error');
       if (error instanceof ApiError) {

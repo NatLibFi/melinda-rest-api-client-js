@@ -3,14 +3,26 @@ import httpStatus from 'http-status';
 import {promisify} from 'util';
 import {Error as ApiError} from '@natlibfi/melinda-commons';
 
-export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnStateChange = false, pollTime = 3000) {
+interface BulkState {
+  correlationId?: string;
+  queueItemState?: string;
+  modificationTime?: string;
+  records?: unknown[];
+};
+
+export interface BulkApiClient {
+  getBulkState(correlationId: string): Promise<unknown>;
+  readBulk(params: {correlationId: string}): Promise<unknown>;
+};
+
+export function pollMelindaRestApi(melindaApiClient: BulkApiClient, correlationId: string, breakLoopOnStateChange = false, pollTime = 3000) {
   const debug = createDebugLogger('@natlibfi/melinda-rest-api-client:pollMelindaRestApi');
   const setTimeoutPromise = promisify(setTimeout);
-  const finalBulkStates = ['DONE', 'ERROR', 'ABORT', undefined];
+  const finalBulkStates: (string | undefined)[] = ['DONE', 'ERROR', 'ABORT', undefined];
 
   return pollResult;
 
-  async function pollResult(modificationTime = null, wait = false) {
+  async function pollResult(modificationTime: string | null = null, wait = false) {
     try {
       if (wait) {
         await setTimeoutPromise(pollTime);
@@ -18,12 +30,12 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
       }
 
       debug(`Polling bulk state: ${correlationId}`);
-      const bulkData = await melindaApiClient.getBulkState(correlationId);
+      const bulkData = (await melindaApiClient.getBulkState(correlationId)) as BulkState;
       debug(`Got bulk state info: ${JSON.stringify(bulkData)}`);
 
       if (finalBulkStates.includes(bulkData.queueItemState)) {
         debug(`Bulk final state ${bulkData.queueItemState}`);
-        const [bulkMetadata] = await melindaApiClient.readBulk({correlationId});
+        const [bulkMetadata] = (await melindaApiClient.readBulk({correlationId})) as BulkState[];
         return bulkMetadata;
       }
 
@@ -37,7 +49,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
       }
 
       if (breakLoopOnStateChange && modificationTime !== bulkData.modificationTime) {
-        const [bulkMetadata] = await melindaApiClient.readBulk({correlationId});
+        const [bulkMetadata] = (await melindaApiClient.readBulk({correlationId})) as BulkState[];
         return bulkMetadata;
       }
 
@@ -53,7 +65,7 @@ export function pollMelindaRestApi(melindaApiClient, correlationId, breakLoopOnS
           return debug(error.payload);
         }
 
-        throw Error(error.payload);
+        throw Error(typeof error.payload === 'string' ? error.payload : String(error.payload));
       }
 
       // Keep polling

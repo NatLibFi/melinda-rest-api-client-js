@@ -3,36 +3,37 @@ import {Error as ApiError, createLogger} from '@natlibfi/melinda-commons';
 
 const logger = createLogger();
 
-export async function checkStatus(response) {
+export async function checkStatus(response: Response): Promise<void> {
 
   // Unauthorized (400)
   if (response.status === httpStatus.BAD_REQUEST) {
     logger.error('Got "BAD_REQUEST" (400) response from melinda-rest-api.');
     const data = await response.json();
     if (data) {
-      logger.error(`${data.message}: ${data.failedParams}`);
-      throw new ApiError(httpStatus.BAD_REQUEST, `${data.message}: ${data.failedParams}`);
+      const {message, failedParams} = data as {message?: string; failedParams?: string};
+      logger.error(`${message}: ${failedParams}`);
+      throw new ApiError(httpStatus.BAD_REQUEST, `${message}: ${failedParams}`);
     }
 
-    throw new ApiError(httpStatus.BAD_REQUEST);
+    throw new ApiError(httpStatus.BAD_REQUEST, undefined);
   }
 
   // Unauthorized (401)
   if (response.status === httpStatus.UNAUTHORIZED) {
     logger.error('Got "UNAUTHORIZED" (401) response from melinda-rest-api.');
-    throw new ApiError(httpStatus.UNAUTHORIZED);
+    throw new ApiError(httpStatus.UNAUTHORIZED, undefined);
   }
 
   // Forbidden (403)
   if (response.status === httpStatus.FORBIDDEN) {
     logger.error('Got "FORBIDDEN" (403) response from melinda-rest-api.');
-    throw new ApiError(httpStatus.FORBIDDEN);
+    throw new ApiError(httpStatus.FORBIDDEN, undefined);
   }
 
   // Not found (404)
   if (response.status === httpStatus.NOT_FOUND) {
     logger.error('Got "NOT_FOUND" (404) response from melinda-rest-api.');
-    throw new ApiError(httpStatus.NOT_FOUND);
+    throw new ApiError(httpStatus.NOT_FOUND, undefined);
   }
 
   // Service unavailable (503)
