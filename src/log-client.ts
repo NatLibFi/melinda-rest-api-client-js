@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import {URL} from 'url';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
 import {checkStatus} from './errorResponseHandler.ts';
-import {removesUndefinedObjectValues, toQueryString, type RequestParamValue} from './utils.ts';
+import {removesUndefinedObjectValues, toQueryString, type HttpMethod, type RequestParamValue} from './utils.ts';
 
 export interface LogClientOptions {
   melindaApiUrl: string;
@@ -32,7 +32,7 @@ export interface GetLogsListParams {
 };
 
 interface DoRequestOptions {
-  method: string;
+  method: HttpMethod;
   path: string;
   contentType?: string;
   params?: Record<string, RequestParamValue | undefined>;

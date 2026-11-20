@@ -3,16 +3,24 @@ import {Error as ApiError, createLogger} from '@natlibfi/melinda-commons';
 
 const logger = createLogger();
 
+function isBadRequestPayload(value: unknown): value is {message: string; failedParams: string} {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const {message, failedParams} = value as {message?: unknown; failedParams?: unknown};
+  return typeof message === 'string' && message.length > 0 && typeof failedParams === 'string' && failedParams.length > 0;
+}
+
 export async function checkStatus(response: Response): Promise<void> {
 
   // Unauthorized (400)
   if (response.status === httpStatus.BAD_REQUEST) {
     logger.error('Got "BAD_REQUEST" (400) response from melinda-rest-api.');
     const data = await response.json();
-    if (data) {
-      const {message, failedParams} = data as {message?: string; failedParams?: string};
-      logger.error(`${message}: ${failedParams}`);
-      throw new ApiError(httpStatus.BAD_REQUEST, `${message}: ${failedParams}`);
+    if (isBadRequestPayload(data)) {
+      logger.error(`${data.message}: ${data.failedParams}`);
+      throw new ApiError(httpStatus.BAD_REQUEST, `${data.message}: ${data.failedParams}`);
     }
 
     throw new ApiError(httpStatus.BAD_REQUEST, undefined);

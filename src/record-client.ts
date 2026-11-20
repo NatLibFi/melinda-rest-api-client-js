@@ -3,12 +3,16 @@ import httpStatus from 'http-status';
 import {URL} from 'url';
 import type {Readable} from 'stream';
 import {Error as ApiError, generateAuthorizationHeader} from '@natlibfi/melinda-commons';
-import {MarcRecord, type MarcRecordObject} from '@natlibfi/marc-record';
+import {MarcRecord, type MarcControlField, type MarcField, type MarcRecordObject, type MarcSubfield} from '@natlibfi/marc-record';
 import {checkStatus} from './errorResponseHandler.ts';
-import {removesUndefinedObjectValues, toQueryString, type RequestParamValue} from './utils.ts';
+import {removesUndefinedObjectValues, toQueryString, type HttpMethod, type QueueItemState, type RequestParamValue} from './utils.ts';
 
 // Does not allow empty subfields. (Probably never true)
 MarcRecord.setValidationOptions({subfieldValues: false});
+
+export type BulkStatus = 'PENDING_VALIDATION' | 'DONE' | 'ABORT';
+
+export type NonEmptyMarcRecordArray = [MarcRecord, ...MarcRecord[]];
 
 export interface RecordClientOptions {
   melindaApiUrl: string;
@@ -55,7 +59,7 @@ export interface BulkParams {
 
 export interface ReadBulkParams {
   correlationId?: string;
-  queueItemState?: string;
+  queueItemState?: QueueItemState;
   creationTime?: string[];
   modificationTime?: string[];
   skip?: number;
@@ -63,7 +67,7 @@ export interface ReadBulkParams {
 }
 
 interface DoRequestOptions {
-  method: string;
+  method: HttpMethod;
   path: string;
   contentType?: string;
   params?: Record<string, RequestParamValue | undefined>;
@@ -119,12 +123,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send update to record in Melinda
-   * @param record Record data in Json format
-   * @param recordId Melinda-ID
-   * @param params Update options
+   * @param params Update request: record data in Json format, Melinda-ID and update options
    * @returns Response JSON
    */
-  function update(record: MarcRecord, recordId: string, {noop = 0, cataloger: recordCataloger, skipLowValidation = 0}: UpdateParams) {
+  function update({record, recordId, noop = 0, cataloger: recordCataloger, skipLowValidation = 0}: UpdateParams & {record: MarcRecord; recordId: string}) {
     const params = removesUndefinedObjectValues({noop, cataloger: recordCataloger, skipLowValidation});
     debug(`POST update prio ${recordId}`);
     return doRequest({method: 'post', path: recordId, params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
@@ -158,12 +160,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Upload single file Bulk operation
-   * @param stream File data stream
-   * @param streamContentType content type for records
-   * @param queryParams Bulk query params
+   * @param params Bulk stream request: file data stream, content type for records and bulk query params
    * @returns Response JSON
    */
-  function createBulk(stream: Readable, streamContentType: string, queryParams: BulkParams) {
+  function createBulk({stream, streamContentType, queryParams}: {stream: Readable; streamContentType: string; queryParams: BulkParams}) {
     debug('POST bulk stream');
     debugDev(`queryParams: ${JSON.stringify(queryParams)}`);
     const params = removesUndefinedObjectValues({...queryParams});
@@ -179,11 +179,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Create Bulk queue item in state QUEUE_ITEM_STATE.VALIDATOR.WAITING_FOR_RECORDS (@natlibfi/melinda-rest-api-commons/constants/QUEUE_ITEM_STATE)
-   * @param contentType type for records
-   * @param queryParams Bulk query params
+   * @param params Bulk request without stream: content type for records and bulk query params
    * @returns Response JSON
    */
-  function createBulkNoStream(contentType: string, queryParams: BulkParams) {
+  function createBulkNoStream({contentType, queryParams}: {contentType: string; queryParams: BulkParams}) {
     debug('POST bulk no stream');
     const params = removesUndefinedObjectValues({...queryParams});
 
@@ -192,44 +191,36 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Set queue item state for bulk item
-   * @param correlationId identifier for bulk item
-   * @param status 'PENDING_VALIDATION', 'DONE' or 'ABORT' (@natlibfi/melinda-rest-api-commons/constants/QUEUE_ITEM_STATE)
+   * @param params Bulk status request: identifier for bulk item and status ('PENDING_VALIDATION', 'DONE' or 'ABORT', @natlibfi/melinda-rest-api-commons/constants/QUEUE_ITEM_STATE)
    * @returns Response JSON
    */
-  function setBulkStatus(correlationId: string, status: string) {
+  function setBulkStatus({correlationId, status}: {correlationId: string; status: BulkStatus}) {
     debug(`PUT bulk status ${correlationId}`);
     return doRequest({method: 'put', path: `bulk/state/${correlationId}`, params: {status}});
   }
 
   /**
    * Send record data to api
-   * @param record JSON record data
-   * @param correlationId identifier for bulk item
-   * @param contentType Content type for handling conversion
+   * @param params Bulk record request: JSON record data, identifier for bulk item and content type for handling conversion
    * @returns Response JSON
    */
-  function sendRecordToBulk(record: MarcRecord, correlationId: string, contentType: string) {
+  function sendRecordToBulk({record, correlationId, contentType}: {record: MarcRecord; correlationId: string; contentType: string}) {
     debug(`POST record to bulk ${correlationId}`);
     //debug(JSON.stringify(record));
     return doRequest({method: 'post', path: `bulk/record/${correlationId}`, contentType, body: JSON.stringify(record, undefined, '')});
   }
 
   /**
-   * Send array of records data to api
-   * @param records Array of JSON record data
-   * @param correlationId identifier for bulk item
-   * @param contentType Content type for handling conversion
+   * Send array of records data to api (max 100 records)
+   * @param params Bulk records request: non-empty array of JSON record data, identifier for bulk item and content type for handling conversion
    * @returns Response JSON
    */
-  function sendRecordArrayToBulk(records: MarcRecord[], correlationId: string, contentType: string) {
-    if (!Array.isArray(records)) {
-      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records is not array`);
-    }
-
+  function sendRecordArrayToBulk({records, correlationId, contentType}: {records: NonEmptyMarcRecordArray; correlationId: string; contentType: string}) {
     if (records.length > 100) {
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records array too long (max 100)`);
     }
 
+    // The NonEmptyMarcRecordArray type forbids empty arrays, but keep the runtime check for untyped JS callers
     if (records.length === 0) {
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Records array empty`);
     }
@@ -299,21 +290,31 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       await checkStatus(response);
 
       if (response.status === httpStatus.OK || response.status === httpStatus.CREATED) {
-        const data = (await response.json()) as Record<string, unknown>;
+        const data: unknown = await response.json();
         const responseAsString = JSON.stringify(data);
         // prevents massive strings
         debug(`Response data: ${responseAsString.length <= 100 ? responseAsString : `${responseAsString.substring(0, 100)}...`}`);
 
         if ((/^bulk\//u).test(path)) {
           debug('Handling bulk response');
-          if (method === 'post') {
-            // Post to bulk
-            const value = data['value'] || data;
-            return value;
-          }
+          switch (method) {
+            case 'post': {
+              // Post to bulk
+              const value = isRecordObject(data) ? data['value'] || data : data;
+              return value;
+            }
 
-          // Query bulk status
-          return data;
+            case 'get':
+            case 'put':
+            case 'delete':
+              // Query bulk status
+              return data;
+
+            default: {
+              const _exhaustive: never = method;
+              throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Unsupported HTTP method for bulk request: ${String(_exhaustive)}`);
+            }
+          }
         }
 
         if (method === 'get') {
@@ -349,12 +350,95 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Unexpected internal error');
     }
   }
+}
 
-  function parseJson(record: unknown): MarcRecordObject {
-    if (typeof record === 'string') {
-      return JSON.parse(record) as MarcRecordObject;
-    }
-
-    return record as MarcRecordObject;
+/**
+ * Parse and guard an API response before handing it to the MarcRecord constructor.
+ * Accepts a record JSON string or an already-parsed record object. Exported as a
+ * test seam for the presence-conditional guards below.
+ * @param record Raw API response (record JSON string or object)
+ * @returns The parsed record, guarded to the accepted subset of MarcRecordObject
+ */
+export function parseJson(record: unknown): MarcRecordObject {
+  const parsed: unknown = typeof record === 'string' ? JSON.parse(record) : record;
+  if (!isMarcRecordObject(parsed)) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'API response is not a valid Marc record (expected object with optional string leader and optional array fields)');
   }
+
+  return parsed;
+}
+
+/**
+ * Verify that a value is a non-null object (used to narrow raw JSON responses before field access)
+ * @param value Value to check
+ * @returns true if the value is a non-null object
+ */
+function isRecordObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+/**
+ * Verify that a value matches the shape of a MarcRecordObject. Mirrors the MarcRecord
+ * constructor's normalization, which is presence-conditional: `leader` must be a string
+ * when present (absence is OK — the constructor defaults it to '') and `fields` must be
+ * an array of valid fields when present (absence is OK — the constructor defaults it to []).
+ * Note: the declared MarcRecordObject type marks leader and fields as required, so the
+ * `value is MarcRecordObject` claim over-admits relative to the strict type: objects
+ * lacking leader/fields are admitted here because the constructor normalizes them to
+ * '' / [] before the result is used as a MarcRecordObject.
+ * @param value Value to check
+ * @returns true if the value can be used as MarcRecordObject
+ */
+function isMarcRecordObject(value: unknown): value is MarcRecordObject {
+  if (!isRecordObject(value) || Array.isArray(value)) {
+    return false;
+  }
+
+  if (value['leader'] !== undefined && typeof value['leader'] !== 'string') {
+    return false;
+  }
+
+  return value['fields'] === undefined || (Array.isArray(value['fields']) && value['fields'].every(isMarcField));
+}
+
+/**
+ * Verify that a value matches the shape of a Marc control field (tag + string value) or
+ * data field. Mirrors the MarcRecord constructor's normalization, which is
+ * presence-conditional: `value` must be a string when present; for data fields `ind1`/
+ * `ind2` must be strings when present (absence is OK — the constructor defaults them to
+ * ' ' for fields that have `subfields`) and `subfields` must be an array of valid
+ * subfields when present (absence is OK — the constructor's `'subfields' in field`
+ * check tolerates absence). `tag` is required: the constructor never defaults it.
+ * Note: the declared MarcControlField/MarcField types mark value, ind1, ind2 and
+ * subfields as required, so the `value is MarcControlField | MarcField` claim
+ * over-admits relative to the strict types: fields lacking ind1/ind2/subfields are
+ * admitted here because the constructor normalizes them before the result is used.
+ * @param value Value to check
+ * @returns true if the value can be used as MarcControlField or MarcField
+ */
+function isMarcField(value: unknown): value is MarcControlField | MarcField {
+  // `tag` is never defaulted by the constructor and is structurally required by both shapes
+  if (!isRecordObject(value) || Array.isArray(value) || typeof value['tag'] !== 'string') {
+    return false;
+  }
+
+  if (value['value'] !== undefined) {
+    // Control field shape: tag + value
+    return typeof value['value'] === 'string';
+  }
+
+  if ((value['ind1'] !== undefined && typeof value['ind1'] !== 'string') || (value['ind2'] !== undefined && typeof value['ind2'] !== 'string')) {
+    return false;
+  }
+
+  return value['subfields'] === undefined || (Array.isArray(value['subfields']) && value['subfields'].every(isMarcSubfield));
+}
+
+/**
+ * Verify that a value matches the shape of a Marc subfield (string code and optional string value)
+ * @param value Value to check
+ * @returns true if the value can be used as MarcSubfield
+ */
+function isMarcSubfield(value: unknown): value is MarcSubfield {
+  return isRecordObject(value) && typeof value['code'] === 'string' && (value['value'] === undefined || typeof value['value'] === 'string');
 }

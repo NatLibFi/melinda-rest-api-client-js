@@ -25,7 +25,7 @@ generateTests({
 async function callback({getFixture, correlationId}: {getFixture: (name: string) => unknown; correlationId?: unknown}) {
   debug(correlationId as string);
   const expectedResponse = getFixture('output.json');
-  const poller = pollMelindaRestApi(melindaApiClient, correlationId as string, false, 10);
+  const poller = pollMelindaRestApi({client: melindaApiClient, correlationId: correlationId as string, pollTime: 10});
   const response = await poller();
   debug(response);
   assert.deepStrictEqual(response, expectedResponse);
