@@ -13,9 +13,11 @@
 		"url": "https://github.com/NatLibFi/melinda-rest-api-client-js"
 	},
 	"license": "MIT",
-	"version": "7.0.0-alpha.1",
+	"version": "7.0.0-alpha.2",
 	"main": "./dist/index.js",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
