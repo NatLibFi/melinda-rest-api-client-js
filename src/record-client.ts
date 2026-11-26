@@ -133,11 +133,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send a request to restore a deleted record in Melinda
-   * @param recordId Melinda-ID
-   * @param params Restore options
+   * @param params Restore request: record id and options
    * @returns Response JSON
    */
-  function restore(recordId: string, {noop = 0, cataloger: recordCataloger}: RestoreRemoveParams) {
+  function restore({recordId, noop = 0, cataloger: recordCataloger}: RestoreRemoveParams & {recordId: string}) {
     debug(`POST restore prio ${recordId}`);
     const params = removesUndefinedObjectValues({noop, cataloger: recordCataloger});
     // restore uses /fix -path and UNDEL -fixType
@@ -146,11 +145,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send a request to remove a record in Melinda
-   * @param recordId Melinda-ID
-   * @param params Remove options
+   * @param params Remove request: record id and options
    * @returns Response JSON
    */
-  function remove(recordId: string, {noop = 0, cataloger: recordCataloger}: RestoreRemoveParams) {
+  function remove({recordId, noop = 0, cataloger: recordCataloger}: RestoreRemoveParams & {recordId: string}) {
     debug(`POST remove prio ${recordId}`);
     const params = removesUndefinedObjectValues({noop, cataloger: recordCataloger});
     // remove uses /fix -path and DELET -fixType
