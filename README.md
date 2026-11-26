@@ -236,19 +236,24 @@ parameter set which cataloger the record change is attributed to.
 
 7.0 has breaking changes:
 
-- **Positional arguments replaced with single object arguments.** The record
-  client methods below all take one options object now. Pass every argument
-  by name (see [the API reference](#api-reference) for the exact keys):
-  - `create` -> `create({record, noop?, unique?, merge?, cataloger?,
-    skipLowValidation?, matchFailuresAsNew?})`
-  - `update` -> `update({record, recordId, noop?, cataloger?, skipLowValidation?})`
-  - `restore` -> `restore({recordId, noop?, cataloger?})`
-  - `remove` -> `remove({recordId, noop?, cataloger?})`
-  - `createBulk` -> `createBulk({stream, streamContentType, queryParams})`
-  - `createBulkNoStream` -> `createBulkNoStream({contentType, queryParams})`
-  - `setBulkStatus` -> `setBulkStatus({correlationId, status})`
-  - `sendRecordToBulk` -> `sendRecordToBulk({record, correlationId, contentType})`
-  - `sendRecordArrayToBulk` -> `sendRecordArrayToBulk({records, correlationId, contentType})`
+- **Positional arguments replaced with single object arguments.** Any client
+  method with more than one parameter takes one options object now. Pass
+  every argument by name (see [the API reference](#api-reference) for the
+  exact keys):
+  - Log client:
+    - `protectLog` -> `protectLog({correlationId, blobSequence?})`
+    - `removeLog` -> `removeLog({correlationId, force?})`
+  - Record client:
+    - `create` -> `create({record, noop?, unique?, merge?, cataloger?,
+      skipLowValidation?, matchFailuresAsNew?})`
+    - `update` -> `update({record, recordId, noop?, cataloger?, skipLowValidation?})`
+    - `restore` -> `restore({recordId, noop?, cataloger?})`
+    - `remove` -> `remove({recordId, noop?, cataloger?})`
+    - `createBulk` -> `createBulk({stream, streamContentType, queryParams})`
+    - `createBulkNoStream` -> `createBulkNoStream({contentType, queryParams})`
+    - `setBulkStatus` -> `setBulkStatus({correlationId, status})`
+    - `sendRecordToBulk` -> `sendRecordToBulk({record, correlationId, contentType})`
+    - `sendRecordArrayToBulk` -> `sendRecordArrayToBulk({records, correlationId, contentType})`
 - **Renamed method `creteBulkNoStream` -> `createBulkNoStream`.** The 6.x typo
   is fixed; the old name no longer exists.
 - **`parseJson` throws `ApiError` (HTTP 500 status) on malformed records.**
@@ -355,10 +360,11 @@ Returns the log API object below. `LogClientOptions`:
   params (GET `logs`). `GetLogParams`:
   `{correlationId?, logItemType?, blobSequence?, standardIdentifiers?,
   databaseId?, sourceIds?, skip?, limit?}`.
-- `protectLog(correlationId: string, {blobSequence?}: {blobSequence?: number})`
-  -> `Promise<unknown>` Set the protect flag on a log (PUT).
-- `removeLog(correlationId: string, {force?}: {force?: number})`
-  -> `Promise<unknown>` Remove a log (DELETE).
+- `protectLog(params: ProtectLogParams)` -> `Promise<unknown>` Set the
+  protect flag on a log (PUT). `ProtectLogParams`: `{correlationId,
+  blobSequence?}`.
+- `removeLog(params: RemoveLogParams)` -> `Promise<unknown>` Remove a log
+  (DELETE). `RemoveLogParams`: `{correlationId, force?}`.
 - `getLogsList(params: GetLogsListParams)` -> `Promise<unknown>` Get a list of
   logs by search params (GET `logs/list`). `GetLogsListParams`:
   `{expanded?, logItemTypes?, catalogers?, dateBefore?, dateAfter?}`.
