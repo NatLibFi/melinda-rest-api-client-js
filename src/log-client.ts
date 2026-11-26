@@ -31,6 +31,16 @@ export interface GetLogsListParams {
   dateAfter?: string;
 };
 
+export interface ProtectLogParams {
+  correlationId: string;
+  blobSequence?: number;
+};
+
+export interface RemoveLogParams {
+  correlationId: string;
+  force?: number;
+};
+
 interface DoRequestOptions {
   method: HttpMethod;
   path: string;
@@ -73,22 +83,20 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Sets protect flag to logs
-   * @param correlationId identifier for log
-   * @param params Protect options
+   * @param params Protect request: identifier for log and protect options
    * @returns {status, payload}
    */
-  function protectLog(correlationId: string, {blobSequence}: {blobSequence?: number}) {
+  function protectLog({correlationId, blobSequence}: ProtectLogParams) {
     const params = removesUndefinedObjectValues({blobSequence});
     return doRequest({method: 'put', path: `logs/${correlationId}`, params});
   }
 
   /**
    * Removes log
-   * @param correlationId identifier for log
-   * @param params Remove options
+   * @param params Remove request: identifier for log and remove options
    * @returns {status, payload}
    */
-  function removeLog(correlationId: string, {force = 0}: {force?: number}) {
+  function removeLog({correlationId, force = 0}: RemoveLogParams) {
     return doRequest({method: 'delete', path: `logs/${correlationId}`, params: {force}});
   }
 
