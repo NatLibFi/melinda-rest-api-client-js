@@ -111,11 +111,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send new record to be saved in Melinda
-   * @param record Record data in Json format
-   * @param params Create options
+   * @param params Create request: record data in Json format and create options
    * @returns Response JSON
    */
-  function create(record: MarcRecord, {noop = 0, unique = 0, merge = 0, cataloger: recordCataloger, skipLowValidation = 0, matchFailuresAsNew}: CreateParams) {
+  function create({record, noop = 0, unique = 0, merge = 0, cataloger: recordCataloger, skipLowValidation = 0, matchFailuresAsNew}: CreateParams & {record: MarcRecord}) {
     debug('POST create prio');
     const params = removesUndefinedObjectValues({noop, unique, merge, cataloger: recordCataloger, skipLowValidation, matchFailuresAsNew});
     return doRequest({method: 'post', path: '', params: {...defaultParamsPrio, ...params}, body: JSON.stringify(record, undefined, '')});
@@ -134,11 +133,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send a request to restore a deleted record in Melinda
-   * @param recordId Melinda-ID
-   * @param params Restore options
+   * @param params Restore request: record id and options
    * @returns Response JSON
    */
-  function restore(recordId: string, {noop = 0, cataloger: recordCataloger}: RestoreRemoveParams) {
+  function restore({recordId, noop = 0, cataloger: recordCataloger}: RestoreRemoveParams & {recordId: string}) {
     debug(`POST restore prio ${recordId}`);
     const params = removesUndefinedObjectValues({noop, cataloger: recordCataloger});
     // restore uses /fix -path and UNDEL -fixType
@@ -147,11 +145,10 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
 
   /**
    * Send a request to remove a record in Melinda
-   * @param recordId Melinda-ID
-   * @param params Remove options
+   * @param params Remove request: record id and options
    * @returns Response JSON
    */
-  function remove(recordId: string, {noop = 0, cataloger: recordCataloger}: RestoreRemoveParams) {
+  function remove({recordId, noop = 0, cataloger: recordCataloger}: RestoreRemoveParams & {recordId: string}) {
     debug(`POST remove prio ${recordId}`);
     const params = removesUndefinedObjectValues({noop, cataloger: recordCataloger});
     // remove uses /fix -path and DELET -fixType
