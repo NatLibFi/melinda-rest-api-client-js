@@ -13,38 +13,52 @@
 		"url": "https://github.com/NatLibFi/melinda-rest-api-client-js"
 	},
 	"license": "MIT",
-	"version": "6.0.3",
+	"version": "7.0.0-alpha.4",
 	"main": "./dist/index.js",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
 	"type": "module",
 	"engines": {
-		"node": ">=22"
+		"node": ">=26"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
 	"scripts": {
 		"prepare": "npm run build",
-		"build": "esbuild \"src/**/*.js\" --sourcemap --platform=node --outdir=dist",
-		"lint": "eslint src",
-		"lint:dev": "eslint --fix src",
-		"test": "npm run lint && npm run test:base",
-		"test:base": "node --test --test-force-exit --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'",
-		"watch:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test node --watch --test --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'",
+		"build": "tsc",
+		"lint": "eslint ./src ./test",
+		"lint:dev": "eslint --fix ./src ./test",
+		"typecheck": "tsc -p tsconfig.test.json",
+		"test": "npm run lint && npm run typecheck && npm run test:base",
+		"test:base": "node --test --test-force-exit --experimental-test-coverage --test-coverage-include=src/** --test-reporter=spec 'test/**/*.test.ts'",
+		"watch:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test node --watch --test --experimental-test-coverage --test-reporter=spec './test/**/*.test.ts'",
 		"dev": "npm run watch:test",
 		"dev:debug": "cross-env LOG_LEVEL=debug DEBUG=@natlibfi/* NODE_ENV=test npm run watch:test"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.1",
-		"@natlibfi/melinda-backend-commons": "^3.0.2",
-		"@natlibfi/melinda-commons": "^14.0.2",
+		"@natlibfi/marc-record": "^11.0.3",
+		"@natlibfi/melinda-commons": "^16.0.0",
 		"debug": "^4.4.3",
 		"http-status": "^2.1.0"
 	},
 	"devDependencies": {
-		"@natlibfi/fixugen-http-client": "^4.0.1",
-		"@natlibfi/fixura": "^4.0.0",
+		"@natlibfi/fixugen-http-client": "^5.0.1",
+		"@natlibfi/fixura": "^5.1.1",
+		"@types/debug": "^4.1.13",
+		"@types/http-status": "^1.1.2",
+		"@types/node": "^26.6.6",
 		"cross-env": "^10.1.0",
-		"esbuild": "^0.27.2",
-		"eslint": "^9.39.2"
+		"eslint": "^10.15.0",
+		"jiti": "^2.7.0",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.73.0"
 	}
 }
