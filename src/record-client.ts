@@ -60,7 +60,19 @@ export interface BulkParams {
 export interface ReadBulkParams {
   correlationId?: string;
   queueItemState?: QueueItemState;
+  /**
+   * UTC timestamps: one element = exact match, two = range [from, to].
+   * Serialized to a stringified JSON array for the query string (the
+   * server parses the value with JSON.parse; comma-joined arrays are
+   * rejected with 400).
+   */
   creationTime?: string[];
+  /**
+   * UTC timestamps: one element = exact match, two = range [from, to].
+   * Serialized to a stringified JSON array for the query string (the
+   * server parses the value with JSON.parse; comma-joined arrays are
+   * rejected with 400).
+   */
   modificationTime?: string[];
   skip?: number;
   limit?: number;
@@ -234,7 +246,17 @@ export function createMelindaApiRecordClient({melindaApiUrl, melindaApiUsername,
    */
   function readBulk({correlationId, queueItemState, creationTime, modificationTime, skip = 0, limit}: ReadBulkParams) {
     debug('GET bulk metadata');
-    const params = removesUndefinedObjectValues({correlationId, queueItemState, creationTime, modificationTime, skip, limit});
+    // The server parses creationTime/modificationTime with JSON.parse, so the
+    // arrays must arrive as stringified JSON. As plain strings they pass the
+    // query builder (toQueryString) through un-mangled.
+    const params = removesUndefinedObjectValues({
+      correlationId,
+      queueItemState,
+      creationTime: creationTime === undefined ? undefined : JSON.stringify(creationTime),
+      modificationTime: modificationTime === undefined ? undefined : JSON.stringify(modificationTime),
+      skip,
+      limit
+    });
 
     return doRequest({method: 'get', path: 'bulk/', params});
   }

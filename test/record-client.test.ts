@@ -18,6 +18,23 @@ function stubFetch(payload: unknown): () => void {
   };
 }
 
+function captureFetchUrl(payload: unknown): {url: string; restore: () => void} {
+  let capturedUrl = '';
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    capturedUrl = String(input);
+    return new Response(JSON.stringify(payload), {status: 200});
+  };
+  return {
+    get url() {
+      return capturedUrl;
+    },
+    restore: () => {
+      globalThis.fetch = originalFetch;
+    }
+  };
+}
+
 // Regression: the guard was previously rejected for rejecting inputs the pre-guard code
 // accepted. The MarcRecord vendor constructor normalizes missing values
 // (leader -> '', fields -> [], ind1/ind2 -> ' ' for fields with subfields), so API
@@ -97,5 +114,47 @@ test('read() surfaces vendor validation errors for records the guard admits', as
     await assert.rejects(melindaApiClient.read('000001'), ApiError);
   } finally {
     restore();
+  }
+});
+
+// The server parses the time params with JSON.parse, so the client must send
+// a stringified JSON array (the shared query builder comma-joins raw arrays,
+// which the server rejects with 400).
+test('readBulk() sends a one-element creationTime as a stringified JSON array', async () => {
+  const captured = captureFetchUrl({correlationId: 'abc', queueItemState: 'DONE'});
+  try {
+    await melindaApiClient.readBulk({correlationId: 'abc', creationTime: ['2026-01-01T00:00:00.000Z']});
+    const searchParams = new URL(captured.url).searchParams;
+    assert.strictEqual(searchParams.get('creationTime'), '["2026-01-01T00:00:00.000Z"]');
+    assert.deepStrictEqual(JSON.parse(searchParams.get('creationTime') as string), ['2026-01-01T00:00:00.000Z']);
+  } finally {
+    captured.restore();
+  }
+});
+
+test('readBulk() sends a two-element modificationTime as a stringified JSON range array', async () => {
+  const captured = captureFetchUrl({correlationId: 'abc', queueItemState: 'DONE'});
+  try {
+    await melindaApiClient.readBulk({
+      correlationId: 'abc',
+      modificationTime: ['2026-01-01T00:00:00.000Z', '2026-02-01T00:00:00.000Z']
+    });
+    const searchParams = new URL(captured.url).searchParams;
+    assert.strictEqual(searchParams.get('modificationTime'), '["2026-01-01T00:00:00.000Z","2026-02-01T00:00:00.000Z"]');
+    assert.deepStrictEqual(JSON.parse(searchParams.get('modificationTime') as string), ['2026-01-01T00:00:00.000Z', '2026-02-01T00:00:00.000Z']);
+  } finally {
+    captured.restore();
+  }
+});
+
+test('readBulk() omits both time params from the query string when undefined', async () => {
+  const captured = captureFetchUrl({correlationId: 'abc', queueItemState: 'DONE'});
+  try {
+    await melindaApiClient.readBulk({correlationId: 'abc'});
+    const searchParams = new URL(captured.url).searchParams;
+    assert.strictEqual(searchParams.get('creationTime'), null);
+    assert.strictEqual(searchParams.get('modificationTime'), null);
+  } finally {
+    captured.restore();
   }
 });
