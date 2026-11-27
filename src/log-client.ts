@@ -27,7 +27,9 @@ export interface GetLogsListParams {
   expanded?: boolean;
   logItemTypes?: string;
   catalogers?: string;
+  /** Upper bound of the creationTime range (server: creationTime[1], <=) */
   dateBefore?: string;
+  /** Lower bound of the creationTime range (server: creationTime[0], >=) */
   dateAfter?: string;
 };
 
@@ -60,7 +62,7 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   }
 
   return {
-    getCatalogers, getLog, protectLog, removeLog, getLogsList
+    getCatalogers, getLog, protectLog, protectLogExplicit, unprotectLog, removeLog, getLogsList
   };
 
   /**
@@ -92,6 +94,26 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
   }
 
   /**
+   * Explicitly protects logs (no toggle): already-protected log items stay protected
+   * @param params Protect request: identifier for log and protect options
+   * @returns {status, payload}
+   */
+  function protectLogExplicit({correlationId, blobSequence}: ProtectLogParams) {
+    const params = removesUndefinedObjectValues({blobSequence});
+    return doRequest({method: 'put', path: `logs/${correlationId}/protect`, params});
+  }
+
+  /**
+   * Explicitly removes the protect flag from logs (no toggle)
+   * @param params Unprotect request: identifier for log and unprotect options
+   * @returns {status, payload}
+   */
+  function unprotectLog({correlationId, blobSequence}: ProtectLogParams) {
+    const params = removesUndefinedObjectValues({blobSequence});
+    return doRequest({method: 'put', path: `logs/${correlationId}/unprotect`, params});
+  }
+
+  /**
    * Removes log
    * @param params Remove request: identifier for log and remove options
    * @returns {status, payload}
@@ -102,11 +124,21 @@ export function createMelindaApiLogClient({melindaApiUrl, melindaApiUsername, me
 
   /**
    * Get list of logs based on search params
-   * @param params Log list search params
+   * @param params Log list search params (dateBefore/dateAfter are mapped to the
+   * server's creationTime JSON range param: [dateAfter, dateBefore], low bound first)
    * @returns List matched of logs
    */
   function getLogsList({expanded, logItemTypes, catalogers, dateBefore, dateAfter}: GetLogsListParams) {
-    const params = removesUndefinedObjectValues({expanded, logItemTypes, catalogers, dateBefore, dateAfter});
+    // The server ignores dateBefore/dateAfter and only reads creationTime as a
+    // stringified JSON array (1 element = one bound, 2 = [dateAfter, dateBefore]
+    // range, low bound first), so map the accepted date params to it
+    const creationTimeArray = [dateAfter, dateBefore].filter((date): date is string => date !== undefined);
+    const params = removesUndefinedObjectValues({
+      expanded,
+      logItemTypes,
+      catalogers,
+      creationTime: creationTimeArray.length > 0 ? JSON.stringify(creationTimeArray) : undefined
+    });
 
     return doRequest({method: 'get', path: 'logs/list', params});
   }
