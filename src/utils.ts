@@ -10,10 +10,12 @@ export type HttpMethod = 'get' | 'post' | 'put' | 'delete';
  *   (@natlibfi/melinda-rest-api-commons is not installed, rg across all packages found no matches)
  * - 'PENDING_VALIDATION', 'DONE', 'ABORT' from the `BulkStatus` type and API client docs in src/record-client.ts
  * - 'IN_QUEUE', 'IMPORTING', 'IN_PROCESS', 'DONE', 'ERROR' from the API responses in test-fixtures/pollMelindaRestApi/
+ * - 'PENDING_QUEUING', 'QUEUING_IN_PROGRESS', 'UPLOADING', 'VALIDATING', 'WAITING_FOR_RECORDS' are the
+ *   flat validator-side states (@natlibfi/melinda-rest-api-commons QUEUE_ITEM_STATE.VALIDATOR)
  *
  * The API may report additional states that are not listed here.
  */
-export type QueueItemState = 'ABORT' | 'DONE' | 'ERROR' | 'IMPORTING' | 'IN_PROCESS' | 'IN_QUEUE' | 'PENDING_VALIDATION';
+export type QueueItemState = 'ABORT' | 'DONE' | 'ERROR' | 'IMPORTING' | 'IN_PROCESS' | 'IN_QUEUE' | 'PENDING_QUEUING' | 'PENDING_VALIDATION' | 'QUEUING_IN_PROGRESS' | 'UPLOADING' | 'VALIDATING' | 'WAITING_FOR_RECORDS';
 
 /**
  * Removes key value pairs that have undefined as value
