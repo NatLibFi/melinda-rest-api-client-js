@@ -308,10 +308,11 @@ does). All methods return Promises.
 - `readBulk(params: ReadBulkParams)` -> `Promise<unknown>` Get bulk queue
   item info (GET). `ReadBulkParams`:
   `{correlationId?, queueItemState?, creationTime?, modificationTime?, skip?, limit?}`.
-  **Note:** `creationTime` and `modificationTime` are currently
-  non-functional — sending them is rejected by the server (a
-  client/server wire-format mismatch). A fix is planned for a
-  release after 7.0; do not rely on them yet.
+  At least one filter param is required (`correlationId`,
+  `queueItemState`, `creationTime` or `modificationTime`).
+  `creationTime`/`modificationTime` are UTC timestamp arrays with one
+  element (exact match) or two (range `[from, to]`); the client serializes
+  them as a stringified JSON array, the format the server expects.
 - `getBulkState(correlationId: string)` -> `Promise<unknown>` Get the state of
   one bulk queue item (GET).
 
@@ -360,18 +361,22 @@ Returns the log API object below. `LogClientOptions`:
   params (GET `logs`). `GetLogParams`:
   `{correlationId?, logItemType?, blobSequence?, standardIdentifiers?,
   databaseId?, sourceIds?, skip?, limit?}`.
-- `protectLog(params: ProtectLogParams)` -> `Promise<unknown>` Set the
-  protect flag on a log (PUT). `ProtectLogParams`: `{correlationId,
-  blobSequence?}`.
+- `protectLog(params: ProtectLogParams)` -> `Promise<unknown>` Toggle the
+  protect flag on a log (PUT `logs/:id`). `ProtectLogParams`:
+  `{correlationId, blobSequence?}`.
+- `protectLogExplicit(params: ProtectLogParams)` -> `Promise<unknown>`
+  Protect a log without toggling (PUT `logs/:id/protect`);
+  already-protected log items stay protected.
+- `unprotectLog(params: ProtectLogParams)` -> `Promise<unknown>` Remove the
+  protect flag from a log without toggling (PUT `logs/:id/unprotect`).
 - `removeLog(params: RemoveLogParams)` -> `Promise<unknown>` Remove a log
   (DELETE). `RemoveLogParams`: `{correlationId, force?}`.
 - `getLogsList(params: GetLogsListParams)` -> `Promise<unknown>` Get a list of
   logs by search params (GET `logs/list`). `GetLogsListParams`:
   `{expanded?, logItemTypes?, catalogers?, dateBefore?, dateAfter?}`.
-  **Note:** `dateBefore` and `dateAfter` are currently ignored by
-  the server (no filtering is applied) due to a client/server
-  parameter mismatch. A fix is planned for a release after 7.0;
-  do not rely on them yet.
+  `dateBefore`/`dateAfter` are sent to the server as a `creationTime`
+  stringified JSON range (`[dateAfter, dateBefore]`, low bound first); the
+  server applies the range to expanded list queries.
 
 ### `pollMelindaRestApi(params: PollParams)`
 
